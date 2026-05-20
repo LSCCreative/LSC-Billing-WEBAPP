@@ -212,6 +212,7 @@ button,input,textarea,select{font-family:'Funnel Sans','FunnelSans',sans-serif}
 .share-label{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);white-space:nowrap}
 @media print{#share-panel{display:none!important}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <header id="app-header">
@@ -226,6 +227,7 @@ button,input,textarea,select{font-family:'Funnel Sans','FunnelSans',sans-serif}
     <button class="nav-link" id="nav-invoice-settings">Invoice Settings</button>
   </div>
 </header>
+<iframe id="pdf-iframe" style="position:fixed;top:-9999px;left:0;width:900px;height:1200px;border:none;pointer-events:none;z-index:-1" sandbox="allow-same-origin"></iframe>
 <div id="share-panel">
   <span class="share-label">Share Estimate</span>
   <input type="text" id="share-url-input" readonly>
@@ -300,6 +302,14 @@ var DEFAULT_TRAVEL=[
 var labourSections=JSON.parse(JSON.stringify(DEFAULT_LABOUR));
 var travelRows=JSON.parse(JSON.stringify(DEFAULT_TRAVEL));
 var projects=[],nextId=1,view='list',editProj=null,viewingId=null;
+function persistProjects(){try{localStorage.setItem('lsc_estimates',JSON.stringify(projects));}catch(e){}}
+function loadProjects(){
+  try{
+    var d=JSON.parse(localStorage.getItem('lsc_estimates')||'[]');
+    projects=Array.isArray(d)?d:[];
+    nextId=projects.length?Math.max.apply(null,projects.map(function(p){return p.id||0;}))+1:1;
+  }catch(e){projects=[];nextId=1;}
+}
 
 // Invoice settings persistence
 function loadInvoiceSettings(){
@@ -589,11 +599,36 @@ function buildDeliverableRow(name,format,duration,qty){
   tr.dataset.rid=rid;
   tr.innerHTML=
     '<div><input class="deliv-name-inp text-inp" type="text" placeholder="e.g. Hero Video" value="'+((name||'').replace(/"/g,'&quot;'))+'"></div>'+
-    '<div><input class="deliv-fmt-inp text-inp" type="text" placeholder="e.g. 16:9 4K" value="'+((format||'').replace(/"/g,'&quot;'))+'"></div>'+
+    '<div style="display:flex;flex-direction:column;gap:4px">'+
+    (function(){
+      var _sf=['Vertical 1080p','16:09 1080p','16:09 4k','Jpg Photos','Raw Photos'];
+      var _ic=!!format&&_sf.indexOf(format)<0&&format!=='[OTHER]';
+      var _sv=_ic?'[OTHER]':(format||'');
+      var _cv=_ic?format:'';
+      return '<select class="deliv-fmt-sel svc-select" style="font-size:11px;padding:5px 8px">'+
+        '<option value="">\u2014 Format \u2014</option>'+
+        ['Vertical 1080p','16:09 1080p','16:09 4k','Jpg Photos','Raw Photos','[OTHER]'].map(function(o){
+          return '<option value="'+o+'"'+(_sv===o?' selected':'')+'>'+o+'</option>';
+        }).join('')+
+        '</select>'+
+        '<input class="deliv-fmt-inp text-inp" type="text" placeholder="Custom format..." '+
+        'style="font-size:11px;'+(_ic||_sv==='[OTHER]'?'':'display:none;')+'" '+
+        'value="'+_cv.replace(/"/g,'&quot;')+'">';
+    })()+
+    '</div>'+
     '<div><input class="deliv-dur-inp text-inp" type="text" placeholder="e.g. 60 sec" value="'+((duration||'').replace(/"/g,'&quot;'))+'"></div>'+
     '<div class="right"><input class="deliv-qty-inp num-inp" type="number" min="0" value="'+(qty||1)+'"></div>'+
     '<div style="justify-content:center"><button class="del-btn" title="Remove">×</button></div>';
   tr.querySelector('.del-btn').addEventListener('click',function(){removeRow(tr);});
+  var _fmtSel=tr.querySelector('.deliv-fmt-sel');
+  var _fmtInp=tr.querySelector('.deliv-fmt-inp');
+  if(_fmtSel&&_fmtInp){
+    _fmtSel.addEventListener('change',function(){
+      _fmtInp.style.display=this.value==='[OTHER]'?'':'none';
+      if(this.value!=='[OTHER]')_fmtInp.value='';
+    });
+    if(_fmtSel.value==='[OTHER]')_fmtInp.style.display='';
+  }
   return tr;
 }
 function deliverablesSectionHTML(){
@@ -639,7 +674,7 @@ function crewSectionHTML(){
     '<div class="bb-head"><div><span class="bb-label">External Crew &amp; Contracts</span><span class="bb-label-tag">Expenses</span></div>'+
     '<span class="bb-sum">Subtotal <b id="sum-crew">$0.00</b></span></div>'+
     '<div class="bb-picker"><button type="button" class="btn btn-accent btn-sm" id="add-crew">+ Add Crew Member</button></div>'+
-    '<div class="gt-head expense-grid"><div>Role / Name</div><div class="right">Days</div><div class="right">Day Rate</div><div class="right">—</div><div class="right">Total</div><div></div></div>'+
+    '<div class="gt-head expense-grid"><div>Role / Name</div><div class="right">Hours</div><div class="right">Hourly Rate</div><div class="right">—</div><div class="right">Total</div><div></div></div>'+
     '<div class="gt-body" id="tbody-crew"><div class="empty-row">No crew added. Click above to add a member.</div></div></div>';
 }
 
@@ -894,7 +929,7 @@ function collectActiveRows(){
   });
   var dtbody=$id('tbody-deliverables');
   if(dtbody)dtbody.querySelectorAll('[data-rid]').forEach(function(tr){
-    ar.deliverables.push({name:(tr.querySelector('.deliv-name-inp')&&tr.querySelector('.deliv-name-inp').value)||'',format:(tr.querySelector('.deliv-fmt-inp')&&tr.querySelector('.deliv-fmt-inp').value)||'',duration:(tr.querySelector('.deliv-dur-inp')&&tr.querySelector('.deliv-dur-inp').value)||'',qty:parseFloat(tr.querySelector('.deliv-qty-inp')&&tr.querySelector('.deliv-qty-inp').value)||1});
+    ar.deliverables.push({name:(tr.querySelector('.deliv-name-inp')&&tr.querySelector('.deliv-name-inp').value)||'',format:(function(){var _s=tr.querySelector('.deliv-fmt-sel');var _i=tr.querySelector('.deliv-fmt-inp');return _s&&_s.value==='[OTHER]'?(_i&&_i.value.trim()||''):(_s&&_s.value||'');})()||'',duration:(tr.querySelector('.deliv-dur-inp')&&tr.querySelector('.deliv-dur-inp').value)||'',qty:parseFloat(tr.querySelector('.deliv-qty-inp')&&tr.querySelector('.deliv-qty-inp').value)||1});
   });
   return ar;
 }
@@ -937,11 +972,13 @@ function saveProject(){
     tax:t.tax,grossProfit:t.grossProfit,totalHours:t.totalHours};
   if(editProj){var idx=projects.findIndex(function(x){return x.id===proj.id;});if(idx!==-1)projects[idx]=proj;else projects.unshift(proj);}
   else projects.unshift(proj);
+  persistProjects();
   editProj=null;viewingId=proj.id;view='estimate';render();
 }
 function deleteProject(){
   if(!editProj||!confirm('Delete this estimate?'))return;
   projects=projects.filter(function(x){return x.id!==editProj.id;});
+  persistProjects();
   editProj=null;view='list';render();
 }
 
@@ -1037,9 +1074,30 @@ function renderEstimate(el){
           .then(function(){showToast('✓ Link copied to clipboard','ok',false);});
       };
       $id('share-copy-email').onclick=function(){
-        var _body='Hi '+proj.client+',\n\nI\'ve put together a project estimate for your review:\n\n'+_su.value+'\n\nThe estimate outlines everything discussed — feel free to reach out if you\'d like to talk through any details.\n\nLooking forward to hearing from you.\n\nBest,\nLachlan\nLSC Creative\nlachlan@creativelsc.com';
-        navigator.clipboard.writeText(_body)
-          .then(function(){showToast('✓ Email template copied','ok',false);});
+        var _isInv=proj.docType==='invoice';
+        var _pdfHtml=_isInv?buildClientInvoicePDF(proj):buildClientPDF(proj);
+        var _iframe=$id('pdf-iframe');
+        showToast('Generating image — please wait…','');
+        _iframe.contentDocument.open();
+        _iframe.contentDocument.write(_pdfHtml);
+        _iframe.contentDocument.close();
+        setTimeout(function(){
+          html2canvas(_iframe.contentDocument.body,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#F0EDE8'}).then(function(canvas){
+            var _jpeg=canvas.toDataURL('image/jpeg',0.9);
+            var _client=esc(proj.clientName||'there');
+            var _html='<p style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#252930">Hi '+_client+',</p>'+
+              '<p style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#252930;line-height:1.6">Please find your project estimate below. Reach out if you have any questions or\'d like to make any changes.</p>'+
+              '<p><img src="'+_jpeg+'" alt="Project Estimate" style="max-width:100%;height:auto;display:block;border:1px solid #E8E2D9;"></p>'+
+              '<p style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#252930;line-height:1.6">Looking forward to working with you.</p>'+
+              '<p style="font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#252930">Best,<br>Lachlan Sullivan-Carey<br>LSC Creative<br><a href="mailto:lachlan@creativelsc.com">lachlan@creativelsc.com</a></p>';
+            var _blob=new Blob([_html],{type:'text/html'});
+            navigator.clipboard.write([new ClipboardItem({'text/html':_blob,'text/plain':new Blob(['Hi '+_client+', please find your project estimate attached.'],{type:'text/plain'})})])
+              .then(function(){showToast('\u2713 Email with estimate image copied — paste into Mail or Outlook','ok',false);})
+              .catch(function(){
+                navigator.clipboard.writeText(_jpeg).then(function(){showToast('\u2713 JPEG copied','ok',false);});
+              });
+          }).catch(function(err){showToast('\u26a0 Image capture failed: '+String(err),'err');});
+        },800);
       };
     }
   })();
@@ -1313,6 +1371,7 @@ $id('modal-invoice-settings').addEventListener('click',function(e){
   if(e.target===this)closeInvoiceSettingsModal();
 });
 
+loadProjects();
 render();
 })();
 </script>
