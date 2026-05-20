@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LSC Creative · Project Billing</title>
+<style id="embedded-fonts">
+  /* ============================================================
+     PASTE YOUR BASE64 FONT DATA HERE (lines 8-9 from your backup)
+     ============================================================ */
+</style>
+<style>
+:root{
+  --bg:#0E0E0E;--text:#F0EDE8;--surface:#1C1F24;--border:rgba(240,237,232,0.1);
+  --accent:#C0603C;--ah:#8C4832;--hover:#4CAF82;--muted:rgba(240,237,232,0.42);--muted2:rgba(240,237,232,0.18);
+  --row-hover:rgba(240,237,232,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Funnel Sans','FunnelSans',sans-serif;font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font-family:'Funnel Sans','FunnelSans',sans-serif}
+.delight{font-family:'Delight','Georgia',serif;font-weight:700}
+#app-header{display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 24px;height:52px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:var(--bg)}
+#logo-btn{display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0}
+#logo-btn img{height:26px;width:auto;filter:brightness(0) invert(1)}
+.logo-text{font-family:'Delight','Georgia',serif;font-weight:700;font-size:16px;color:var(--text);letter-spacing:.04em}
+.logo-text em{color:var(--accent);font-style:normal}
+#hdr-right{display:flex;align-items:center;gap:6px}
+.nav-link{background:none;border:none;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;padding:6px 12px;border-bottom:2px solid transparent;transition:.15s}
+.nav-link:hover{color:var(--hover)}
+.nav-link.active{color:var(--text);border-bottom-color:var(--hover)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--hover);color:var(--hover)}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.btn-accent:hover{background:var(--ah);border-color:var(--ah);color:#fff}
+.btn-ghost{border-color:var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--muted);color:var(--text)}
+.btn-danger{border-color:#5a2020;color:#e06060}
+.btn-danger:hover{background:#e06060;color:#fff;border-color:#e06060}
+.btn-sm{padding:5px 12px;font-size:10px}
+.btn-xs{padding:3px 8px;font-size:10px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+#main{max-width:1080px;margin:0 auto;padding:34px 40px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:26px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.page-title{font-family:'Delight','Georgia',serif;font-weight:700;font-size:30px;color:var(--text);letter-spacing:.02em}
+.page-sub{color:var(--muted);font-size:11px;margin-top:4px;letter-spacing:.04em;text-transform:uppercase}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:none;border:none;cursor:pointer;padding:0;margin-bottom:18px;transition:.15s}
+.back-btn:hover{color:var(--hover)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.proj-card{background:var(--surface);border:1px solid var(--border);padding:22px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.proj-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--hover);transform:scaleX(0);transition:transform .2s ease-out;transform-origin:left}
+.proj-card:hover{border-color:var(--hover)}
+.proj-card:hover::after{transform:scaleX(1)}
+.card-num{color:var(--accent);font-size:11px;font-weight:500;letter-spacing:.04em;margin-bottom:5px}
+.card-name{font-family:'Delight','Georgia',serif;font-weight:700;font-size:18px;margin-bottom:4px;color:var(--text)}
+.card-client{color:var(--muted);font-size:11px;margin-bottom:16px;text-transform:uppercase;letter-spacing:.06em}
+.card-gross-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.card-gross{font-family:'Delight','Georgia',serif;font-weight:700;font-size:26px;color:var(--accent)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.card-date{color:var(--muted);font-size:10px}
+.tag{font-size:10px;padding:3px 9px;border:1px solid var(--border);color:var(--muted);letter-spacing:.05em}
+.empty-state{text-align:center;padding:80px 30px;border:1px dashed var(--border)}
+.empty-state h3{font-family:'Delight','Georgia',serif;font-weight:700;font-size:22px;color:var(--muted);margin-bottom:10px}
+.empty-state p{color:var(--muted);font-size:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.field input,.field textarea{background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;outline:none;transition:.15s;width:100%}
+.field input:focus,.field textarea:focus{border-color:var(--hover)}
+.field textarea{resize:vertical;min-height:60px}
+.field input[type=number]{-moz-appearance:textfield}
+.field input[type=number]::-webkit-outer-spin-button,.field input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.upid-field{border-color:var(--hover) !important}
+.billing-block{border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
+.bb-head{display:flex;justify-content:space-between;align-items:center;background:#0E0E0E;padding:9px 16px;border-bottom:1px solid var(--border)}
+.bb-head.collapsible{cursor:pointer;user-select:none}
+.bb-label{font-family:'Delight','Georgia',serif;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--text)}
+.bb-label-tag{font-size:9px;padding:2px 7px;border:1px solid var(--border);color:var(--muted);letter-spacing:.06em;margin-left:8px;vertical-align:middle;text-transform:uppercase;font-family:'Funnel Sans',sans-serif;font-weight:400}
+.bb-sum{font-size:11px;color:var(--muted)}
+.bb-sum b{color:var(--text)}
+.bb-chevron{color:var(--muted);font-size:10px;margin-right:8px;display:inline-block;transition:transform .2s}
+.bb-picker{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:rgba(240,237,232,0.04)}
+.svc-select{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:12px;padding:6px 10px;outline:none;cursor:pointer;max-width:420px}
+.svc-select:focus{border-color:var(--hover)}
+.svc-select option{background:#1C1F24;color:var(--text)}
+.gt-head,.gt-row{display:grid;align-items:center}
+.labour-grid{grid-template-columns:3fr 90px 90px 90px 110px 32px}
+.expense-grid{grid-template-columns:3fr 90px 90px 90px 110px 32px}
+.deliv-grid{grid-template-columns:3fr 1fr 1fr 70px 32px}
+.gt-head{border-bottom:1px solid var(--border)}
+.gt-head>div{padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:400}
+.gt-row{border-bottom:1px solid rgba(240,237,232,0.08)}
+.gt-body>[data-rid]:last-child{border-bottom:none}
+.gt-row:hover{background:var(--row-hover)}
+.gt-row>div{padding:4px 10px;font-size:12px;display:flex;align-items:center}
+.gt-row>div.right{justify-content:flex-end}
+.gt-row>div.muted-td{color:var(--muted)}
+.gt-row .num-inp{width:100%;box-sizing:border-box}
+.gt-row .text-inp{width:100%;box-sizing:border-box}
+.gt-row .bill-cell{width:100%;text-align:right}
+.gt-body .empty-row{text-align:center;padding:18px 14px;color:var(--muted2);font-size:11px}
+.empty-row td{text-align:center;color:var(--muted);font-size:11px;padding:16px 14px;font-style:italic}
+.text-inp{background:#161819;border:1px solid var(--border);color:var(--text);font-size:12px;font-family:'Funnel Sans',sans-serif;padding:5px 8px;outline:none;transition:.15s;width:100%}
+.text-inp:focus{border-color:var(--hover)}
+.num-inp{width:72px;background:#161819;border:1px solid var(--border);color:var(--text);font-size:12px;font-family:'Funnel Sans',sans-serif;padding:5px 8px;outline:none;transition:.15s;text-align:right}
+.num-inp::-webkit-inner-spin-button{-webkit-appearance:none}
+.num-inp:focus{border-color:var(--hover)}
+.text-inp{background:#161819;border:1px solid var(--border);color:var(--text);font-size:12px;padding:5px 8px;outline:none;transition:.15s;width:100%}
+.text-inp:focus{border-color:var(--hover)}
+.bill-cell{color:var(--accent);font-weight:600;white-space:nowrap}
+.muted-td{color:var(--muted)}
+.right{text-align:right}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;transition:.15s}
+.del-btn:hover{color:#e06060}
+.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);margin-bottom:22px;border:1px solid var(--border);overflow:hidden}
+.sum-item{padding:14px 18px;border-right:1px solid var(--border)}
+.sum-item:last-child{border-right:none}
+.sum-label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px}
+.sum-value{font-family:'Delight','Georgia',serif;font-weight:700;font-size:19px;color:var(--text)}
+.sum-value.accent{color:var(--accent)}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:18px;border-top:1px solid var(--border)}
+.est-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.est-upid{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:4px}
+.est-name{font-family:'Delight','Georgia',serif;font-weight:700;font-size:32px;color:var(--text);line-height:1.1}
+.est-client{color:var(--muted);font-size:12px;margin-top:4px;text-transform:uppercase;letter-spacing:.07em}
+.est-block{border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
+.est-block-head{background:#0E0E0E;padding:8px 16px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border)}
+.est-block-label{font-family:'Delight','Georgia',serif;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--text)}
+.est-block-sum{color:var(--text);font-size:11px;font-weight:600}
+.est-table{width:100%;border-collapse:collapse}
+.est-table th{text-align:left;padding:7px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:400}
+.est-table td{padding:7px 14px;border-bottom:1px solid rgba(240,237,232,0.08);font-size:12px}
+.est-table tr:last-child td{border-bottom:none}
+.est-table .right{text-align:right}
+.est-table .bill{color:var(--accent);font-weight:600}
+.est-totals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.totals-card{border:1px solid var(--border);overflow:hidden}
+.totals-card table{width:100%;border-collapse:collapse}
+.totals-card td{padding:9px 18px;border-bottom:1px solid rgba(240,237,232,0.08);font-size:12px}
+.totals-card tr:last-child td{border-bottom:none}
+.tl{color:var(--muted)}.tv{text-align:right;font-weight:600}
+.net-row td{color:var(--accent);font-size:15px;font-weight:700;background:rgba(192,96,60,0.08)}
+.notes-card{border:1px solid var(--border);padding:18px}
+.notes-card h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.notes-card p{color:var(--muted);line-height:1.8;font-size:12px}
+.spinner{width:11px;height:11px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.export-toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);padding:12px 18px;display:none;align-items:center;gap:10px;font-size:12px;z-index:9999}
+.export-toast.show{display:flex}
+.export-toast.ok{border-color:#2d6a2d;background:#141f14}
+.export-toast.err{border-color:#7a2222;background:#1f1414}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.toast-dot.ok{background:#6fcf6f}
+.toast-dot.err{background:#f56a6a}
+.toast-link{color:var(--accent);cursor:pointer;text-decoration:underline;font-size:11px;margin-left:4px}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:22px}
+.pricing-section{border:1px solid var(--border);overflow:hidden}
+.pricing-sec-head{background:#0E0E0E;padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.pricing-sec-label{font-family:'Delight','Georgia',serif;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--text)}
+.pricing-table{width:100%;border-collapse:collapse}
+.pricing-table th{text-align:left;padding:7px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:400}
+.pricing-table td{padding:7px 14px;border-bottom:1px solid rgba(240,237,232,0.08);font-size:12px;vertical-align:middle}
+.pricing-table tr:last-child td{border-bottom:none}
+.pricing-table input{background:#161819;border:1px solid var(--border);color:var(--text);font-size:12px;font-family:'Funnel Sans',sans-serif;padding:5px 8px;outline:none;width:90px;text-align:right}
+.pricing-table input::-webkit-inner-spin-button{-webkit-appearance:none}
+.pricing-table input:focus{border-color:var(--hover)}
+.tax-setting{border:1px solid var(--border);padding:18px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.tax-setting input{background:#161819;border:1px solid var(--border);color:var(--text);font-size:13px;padding:6px 10px;outline:none;width:90px;text-align:right}
+.tax-setting input:focus{border-color:var(--hover)}
+.pricing-save-bar{background:var(--surface);border:1px solid var(--border);padding:14px 22px;display:flex;justify-content:space-between;align-items:center}
+.pricing-save-bar p{font-size:11px;color:var(--muted)}
+.saved-msg{color:#6fcf6f;font-size:11px;display:none}
+/* Invoice Settings Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border);width:500px;max-width:95vw;padding:28px 32px}
+.modal-title{font-family:'Delight','Georgia',serif;font-weight:700;font-size:20px;color:var(--text);margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:18px;border-top:1px solid var(--border);margin-top:18px}
+/* Doc type bar */
+.doc-type-bar{display:flex;align-items:center;gap:12px;padding:12px 0 18px;margin-bottom:16px}
+.doc-type-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
+.doc-type-select{background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:12px;padding:6px 10px;outline:none;cursor:pointer;transition:.15s}
+.doc-type-select:focus{border-color:var(--hover)}
+.inv-num-wrap{display:none;align-items:center;gap:8px}
+.inv-num-wrap.show{display:flex}
+.inv-num-inp{background:var(--surface);border:1px solid var(--accent);color:var(--text);font-size:12px;padding:6px 10px;outline:none;width:130px;font-family:'Funnel Sans',sans-serif}
+.inv-num-inp:focus{border-color:var(--text)}
+</style>
+</head>
+<body>
+<header id="app-header">
+  <button id="logo-btn">
+    <span class="logo-text">LSC CREATIVE<em>.</em></span>
+  </button>
+  <div id="hdr-right">
+    <button class="nav-link" id="nav-estimates">Estimates</button>
+    <button class="nav-link" id="nav-pricing">Pricing</button>
+    <button class="nav-link" id="nav-invoice-settings">Invoice Settings</button>
+  </div>
+</header>
+<div id="main"></div>
+<div class="export-toast" id="export-toast">
+  <div class="toast-dot" id="toast-dot"></div>
+  <div id="toast-msg"></div>
+</div>
+<div class="modal-overlay" id="modal-invoice-settings">
+  <div class="modal-box">
+    <div class="modal-title">Invoice Settings</div>
+    <div class="form-grid">
+      <div class="field"><label>Bank Name</label><input id="inv-bank-name" type="text" placeholder="e.g. Commonwealth Bank"></div>
+      <div class="field"><label>Account Name</label><input id="inv-account-name" type="text" placeholder="e.g. LSC Creative Pty Ltd"></div>
+      <div class="field"><label>BSB</label><input id="inv-bsb" type="text" placeholder="e.g. 062-000"></div>
+      <div class="field"><label>Account Number</label><input id="inv-account-num" type="text" placeholder="e.g. 12345678"></div>
+      <div class="field full"><label>Payment Terms</label><textarea id="inv-payment-terms" placeholder="e.g. Strictly 14 Days — EFT only. Please reference invoice number."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-close-inv-settings">Cancel</button>
+      <button class="btn btn-accent" id="btn-save-inv-settings">Save Details</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+
+var TAX_RATE=0.35;
+var rowCounter=0;
+function rid(){return 'r'+(++rowCounter);}
+
+var DEFAULT_LABOUR=[
+  {id:'preprod',label:'Pre-Production',rows:[
+    {name:'Pre-Production Meeting with Client',rate:40,mu:56},
+    {name:'Pre-Production Development & Admin',rate:30,mu:42},
+  ]},
+  {id:'prod',label:'Production',rows:[
+    {name:'Video Capture',rate:100,mu:140},
+    {name:'Photo Capture',rate:80,mu:112},
+    {name:'Drone Aerial Capture',rate:60,mu:84},
+  ]},
+  {id:'post',label:'Post-Production',rows:[
+    {name:'Video Editor — Project Setup',rate:35,mu:49},
+    {name:'Video Editor — B-Roll Offline Edit',rate:45,mu:63},
+    {name:'Video Editor — A-Roll Offline Edit',rate:45,mu:63},
+    {name:'Video Editor — A-Roll RC',rate:100,mu:140},
+    {name:'Video Editor — Longform RC',rate:100,mu:140},
+    {name:'Video Editor — Longform AC',rate:100,mu:140},
+    {name:'Video Editor — Longform Draft',rate:100,mu:140},
+    {name:'Video Editor — Longform Colour',rate:100,mu:140},
+    {name:'Video Editor — Longform Sound Mix/Master',rate:100,mu:140},
+    {name:'Video Editor — Socials',rate:90,mu:126},
+    {name:'Processed Footage Handover [Over Cloud]',rate:35,mu:49},
+    {name:'Raw Footage Handover [on HDD]',rate:70,mu:98,customBill:true},
+    {name:'Photo Editor',rate:110,mu:154},
+  ]},
+];
+
+var DEFAULT_TRAVEL=[
+  {name:'Fuel & Tolls',rate:1,mu:1,directCost:true},
+  {name:'Crew Meals',rate:30,mu:30,unit:'meals'},
+  {name:'Transport & Logistics Hrs',rate:25,mu:35},
+  {name:'Flights & Public Transport',rate:0,mu:0,directCost:true},
+  {name:'Crew Accommodation',rate:0,mu:0,directCost:true},
+];
+
+var labourSections=JSON.parse(JSON.stringify(DEFAULT_LABOUR));
+var travelRows=JSON.parse(JSON.stringify(DEFAULT_TRAVEL));
+var projects=[],nextId=1,view='list',editProj=null,viewingId=null;
+
+// Invoice settings persistence
+function loadInvoiceSettings(){
+  try{return JSON.parse(localStorage.getItem('lsc-invoice-settings')||'{}');}catch(e){return{};}
+}
+function saveInvoiceSettings(s){
+  try{localStorage.setItem('lsc-invoice-settings',JSON.stringify(s));}catch(e){}
+}
+
+function fmt(n){return'$'+(parseFloat(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function pad(n){return n<10?'00'+n:n<100?'0'+n:''+n;}
+function today(){return new Date().toISOString().slice(0,10);}
+function $id(id){return document.getElementById(id);}
+function qsa(s,c){return(c||document).querySelectorAll(s);}
+
+var toastTimer;
+function showToast(msg,type,link){
+  var t=$id('export-toast'),d=$id('toast-dot'),m=$id('toast-msg');
+  if(!t||!d||!m)return;
+  m.innerHTML=msg;
+  t.className='export-toast show '+(type||'');d.className='toast-dot '+(type||'');
+  clearTimeout(toastTimer);
+  if(type==='ok'||type==='err')toastTimer=setTimeout(function(){t.classList.remove('show');},5000);
+}
+
+function setNav(){
+  $id('nav-estimates').classList.toggle('active',view!=='pricing');
+  $id('nav-pricing').classList.toggle('active',view==='pricing');
+}
+function render(){
+  setNav();
+  var m=$id('main');
+  if(view==='list')renderList(m);
+  else if(view==='form')renderForm(m);
+  else if(view==='estimate')renderEstimate(m);
+  else if(view==='pricing')renderPricing(m);
+}
+$id('logo-btn').addEventListener('click',function(){view='list';render();});
+$id('nav-estimates').addEventListener('click',function(){view='list';render();});
+$id('nav-pricing').addEventListener('click',function(){view='pricing';render();});
+$id('nav-invoice-settings').addEventListener('click',function(){openInvoiceSettingsModal();});
+
+// ── LIST ──────────────────────────────────────────────────────────────────────
+function renderList(el){
+  var html='<div class="page-head"><div><div class="page-title">Estimates</div>'+
+    '<div class="page-sub">'+(projects.length?projects.length+' estimate'+(projects.length!==1?'s':''):'No estimates yet')+'</div></div>'+
+    '<button class="btn btn-accent" id="js-new">+ New Estimate</button></div>';
+  if(!projects.length){
+    html+='<div class="empty-state"><h3>No estimates yet</h3><p>Click <strong>New Estimate</strong> to get started.</p></div>';
+  }else{
+    html+='<div class="cards-grid">';
+    projects.forEach(function(p){
+      html+='<div class="proj-card" data-id="'+p.id+'">'+
+        '<div class="card-num">'+esc(p.upid||'—')+'</div>'+
+        '<div class="card-name">'+esc(p.name)+'</div>'+
+        '<div class="card-client">'+esc(p.businessName||'—')+'</div>'+
+        '<div style="margin-bottom:8px">'+(p.docType==='invoice'?'<span style="font-size:9px;padding:2px 7px;border:1px solid var(--accent);color:var(--accent);letter-spacing:.05em">INVOICE</span>':'<span style="font-size:9px;padding:2px 7px;border:1px solid var(--border);color:var(--muted);letter-spacing:.05em">ESTIMATE</span>')+'</div>'+
+        '<div class="card-gross-label">Net Invoice</div>'+
+        '<div class="card-gross">'+fmt(p.net)+'</div>'+
+        '<div class="card-foot"><div class="card-date">'+esc(p.date||'—')+'</div><div class="tag">'+esc(p.clientName||'—')+'</div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+  }
+  el.innerHTML=html;
+  $id('js-new').addEventListener('click',function(){editProj=null;view='form';render();});
+  qsa('.proj-card',el).forEach(function(c){c.addEventListener('click',function(){viewingId=parseInt(c.dataset.id);view='estimate';render();});});
+}
+
+// ── RECALC ────────────────────────────────────────────────────────────────────
+function recalc(){
+  var labourTotal=0,expenseTotal=0,totalHours=0;
+  labourSections.forEach(function(sec){
+    var secTotal=0;
+    var tbody=$id('tbody-'+sec.id);
+    if(!tbody)return;
+    tbody.querySelectorAll('[data-rid]').forEach(function(tr){
+      var qInp=tr.querySelector('.qty-inp');
+      var qty=parseFloat(qInp&&qInp.value)||0;
+      totalHours+=qty;
+      var mu=parseFloat(tr.dataset.mu)||0;
+      var custInp=tr.querySelector('.custom-bill-inp');
+      var custVal=parseFloat(custInp&&custInp.value)||0;
+      var bill=custVal>0?custVal:qty*mu;
+      secTotal+=bill;
+      var bc=tr.querySelector('.bill-cell');if(bc)bc.textContent=fmt(bill);
+    });
+    labourTotal+=secTotal;
+    var se=$id('sum-'+sec.id);if(se)se.textContent=fmt(secTotal);
+  });
+
+  var travelTotal=0;
+  var ttbody=$id('tbody-travel');
+  if(ttbody){
+    ttbody.querySelectorAll('[data-rid]').forEach(function(tr){
+      var qInp=tr.querySelector('.qty-inp');
+      var qty=parseFloat(qInp&&qInp.value)||0;
+      var isDirect=tr.dataset.direct==='true';
+      var mu=parseFloat(tr.dataset.mu)||0;
+      var bill=isDirect?qty:qty*mu;
+      travelTotal+=bill;expenseTotal+=bill;
+      var bc=tr.querySelector('.bill-cell');if(bc)bc.textContent=fmt(bill);
+    });
+  }
+  var tse=$id('sum-travel');if(tse)tse.textContent=fmt(travelTotal);
+
+  var equipTotal=0;
+  var etbody=$id('tbody-equip');
+  if(etbody){
+    etbody.querySelectorAll('[data-rid]').forEach(function(tr){
+      var dInp=tr.querySelector('.days-inp');
+      var cInp=tr.querySelector('.cost-inp');
+      var bill=(parseFloat(dInp&&dInp.value)||0)*(parseFloat(cInp&&cInp.value)||0);
+      equipTotal+=bill;expenseTotal+=bill;
+      var bc=tr.querySelector('.bill-cell');if(bc)bc.textContent=fmt(bill);
+    });
+  }
+  var ese=$id('sum-equip');if(ese)ese.textContent=fmt(equipTotal);
+
+  var crewTotal=0;
+  var ctbody=$id('tbody-crew');
+  if(ctbody){
+    ctbody.querySelectorAll('[data-rid]').forEach(function(tr){
+      var dInp=tr.querySelector('.days-inp');
+      var cInp=tr.querySelector('.cost-inp');
+      var bill=(parseFloat(dInp&&dInp.value)||0)*(parseFloat(cInp&&cInp.value)||0);
+      crewTotal+=bill;expenseTotal+=bill;
+      var bc=tr.querySelector('.bill-cell');if(bc)bc.textContent=fmt(bill);
+    });
+  }
+  var cse=$id('sum-crew');if(cse)cse.textContent=fmt(crewTotal);
+
+  var net=labourTotal+expenseTotal;
+  var tax=labourTotal*TAX_RATE;
+  var grossProfit=net-tax;
+  function sv(id,v){var e=$id(id);if(e)e.textContent=v;}
+  sv('s-labour',fmt(labourTotal));sv('s-expenses',fmt(expenseTotal));
+  sv('s-net',fmt(net));sv('s-tax',fmt(tax));sv('s-gross',fmt(grossProfit));sv('s-hrs',totalHours);
+}
+
+// ── ROW BUILDERS ─────────────────────────────────────────────────────────────
+function buildLabourRow(rowDef,qty,override){
+  var id=rid();
+  var tr=document.createElement('div');
+  tr.className='gt-row labour-grid';
+  tr.dataset.rid=id;tr.dataset.mu=rowDef.mu;tr.dataset.rate=rowDef.rate;
+  var custCell='';
+  if(rowDef.customBill){
+    custCell='<input class="num-inp custom-bill-inp" type="number" min="0" step="0.01" value="'+(override||'')+'" title="Override bill ($)">';
+  }
+  tr.innerHTML=
+    '<div>'+esc(rowDef.name)+'</div>'+
+    '<div class="right"><input class="num-inp qty-inp" type="number" min="0" step="0.5" value="'+(qty||'')+'"></div>'+
+    '<div class="right muted-td">'+(rowDef.rate>0?fmt(rowDef.rate):'—')+'</div>'+
+    '<div class="right muted-td">'+fmt(rowDef.mu)+'</div>'+
+    '<div class="right"><span class="bill-cell">'+fmt((qty||0)*rowDef.mu)+'</span>'+custCell+'</div>'+
+    '<div style="justify-content:center"><button class="del-btn" title="Remove">×</button></div>';
+  bindLabourRowEvents(tr);
+  return tr;
+}
+
+function buildTravelRow(rowDef,qty){
+  var id=rid();
+  var tr=document.createElement('div');
+  tr.className='gt-row expense-grid';
+  tr.dataset.rid=id;tr.dataset.mu=rowDef.mu;tr.dataset.direct=rowDef.directCost?'true':'false';
+  var rateLabel=rowDef.directCost?'Direct':(rowDef.rate>0?fmt(rowDef.rate):'—');
+  var muLabel=rowDef.directCost?'—':(rowDef.mu!==rowDef.rate?fmt(rowDef.mu):'None');
+  tr.innerHTML=
+    '<div>'+esc(rowDef.name)+'</div>'+
+    '<div class="right"><input class="num-inp qty-inp" type="number" min="0" step="0.01" value="'+(qty||'')+'"></div>'+
+    '<div class="right muted-td">'+rateLabel+'</div>'+
+    '<div class="right muted-td">'+muLabel+'</div>'+
+    '<div class="right"><span class="bill-cell">'+fmt(0)+'</span></div>'+
+    '<div style="justify-content:center"><button class="del-btn" title="Remove">×</button></div>';
+  bindTravelRowEvents(tr);
+  return tr;
+}
+
+function buildEquipRow(vendor,days,cost){
+  var id=rid();
+  var tr=document.createElement('div');
+  tr.className='gt-row expense-grid';
+  tr.dataset.rid=id;
+  tr.innerHTML=
+    '<div><input class="text-inp vendor-inp" type="text" value="'+esc(vendor||'')+'" placeholder="Vendor / item name"></div>'+
+    '<div class="right"><input class="num-inp days-inp" type="number" min="0" step="0.5" value="'+(days||'')+'"></div>'+
+    '<div class="right"><input class="num-inp cost-inp" type="number" min="0" step="0.01" value="'+(cost||'')+'"></div>'+
+    '<div class="right muted-td">—</div>'+
+    '<div class="right"><span class="bill-cell">'+fmt((days||0)*(cost||0))+'</span></div>'+
+    '<div style="justify-content:center"><button class="del-btn" title="Remove">×</button></div>';
+  bindEquipRowEvents(tr);
+  return tr;
+}
+
+function buildCrewRow(role,days,cost){
+  var id=rid();
+  var tr=document.createElement('div');
+  tr.className='gt-row expense-grid';
+  tr.dataset.rid=id;
+  tr.innerHTML=
+    '<div><input class="text-inp role-inp" type="text" value="'+esc(role||'')+'" placeholder="Role / contractor name"></div>'+
+    '<div class="right"><input class="num-inp days-inp" type="number" min="0" step="0.5" value="'+(days||'')+'"></div>'+
+    '<div class="right"><input class="num-inp cost-inp" type="number" min="0" step="0.01" value="'+(cost||'')+'"></div>'+
+    '<div class="right muted-td">—</div>'+
+    '<div class="right"><span class="bill-cell">'+fmt((days||0)*(cost||0))+'</span></div>'+
+    '<div style="justify-content:center"><button class="del-btn" title="Remove">×</button></div>';
+  bindEquipRowEvents(tr);
+  return tr;
+}
+
+function bindLabourRowEvents(tr){
+  var qInp=tr.querySelector('.qty-inp');
+  var cInp=tr.querySelector('.custom-bill-inp');
+  if(qInp){qInp.addEventListener('focus',function(){if(parseFloat(this.value)===0||this.value==='0')this.value='';});qInp.addEventListener('input',recalc);}
+  if(cInp){cInp.addEventListener('focus',function(){if(parseFloat(this.value)===0||this.value==='0')this.value='';});cInp.addEventListener('input',recalc);}
+  var del=tr.querySelector('.del-btn');if(del)del.addEventListener('click',function(){removeRow(tr);});
+}
+function bindTravelRowEvents(tr){
+  var qInp=tr.querySelector('.qty-inp');
+  if(qInp){qInp.addEventListener('focus',function(){if(parseFloat(this.value)===0||this.value==='0')this.value='';});qInp.addEventListener('input',recalc);}
+  var del=tr.querySelector('.del-btn');if(del)del.addEventListener('click',function(){removeRow(tr);});
+}
+function bindEquipRowEvents(tr){
+  [tr.querySelector('.days-inp'),tr.querySelector('.cost-inp')].forEach(function(inp){
+    if(!inp)return;
+    inp.addEventListener('focus',function(){if(parseFloat(this.value)===0||this.value==='0')this.value='';});
+    inp.addEventListener('input',recalc);
+  });
+  var del=tr.querySelector('.del-btn');if(del)del.addEventListener('click',function(){removeRow(tr);});
+}
+
+function removeRow(tr){
+  var tbody=tr.parentNode;if(!tbody)return;
+  tr.remove();
+  if(!tbody.querySelector('[data-rid]')){
+    var em=document.createElement('div');em.className='empty-row';
+    em.textContent='No services added. Use the selector above to add one.';
+    tbody.appendChild(em);
+  }
+  recalc();
+}
+function injectRow(tbody,tr){
+  var em=tbody&&tbody.querySelector('.empty-row');if(em)em.remove();
+  if(tbody)tbody.appendChild(tr);
+  recalc();
+}
+
+// ── SECTION HTML ─────────────────────────────────────────────────────────────
+
+// ── DELIVERABLES ──────────────────────────────────────────────────────────────
+var deliverableRid=0;
+function buildDeliverableRow(name,format,duration,qty){
+  var rid='deliv-'+(++deliverableRid);
+    var tr=document.createElement('div');
+  tr.className='gt-row deliv-grid';
+  tr.dataset.rid=rid;
+  tr.innerHTML=
+    '<div><input class="deliv-name-inp text-inp" type="text" placeholder="e.g. Hero Video" value="'+((name||'').replace(/"/g,'&quot;'))+'"></div>'+
+    '<div><input class="deliv-fmt-inp text-inp" type="text" placeholder="e.g. 16:9 4K" value="'+((format||'').replace(/"/g,'&quot;'))+'"></div>'+
+    '<div><input class="deliv-dur-inp text-inp" type="text" placeholder="e.g. 60 sec" value="'+((duration||'').replace(/"/g,'&quot;'))+'"></div>'+
+    '<div class="right"><input class="deliv-qty-inp num-inp" type="number" min="0" value="'+(qty||1)+'"></div>'+
+    '<div style="justify-content:center"><button class="del-btn" title="Remove">×</button></div>';
+  tr.querySelector('.del-btn').addEventListener('click',function(){removeRow(tr);});
+  return tr;
+}
+function deliverablesSectionHTML(){
+  return'<div class="billing-block" id="block-deliverables">'+
+    '<div class="bb-head">'+
+      '<div><span class="bb-label">Deliverables</span><span class="bb-label-tag">PROJECT OUTPUT</span></div>'+
+      '<button class="btn-accent btn-sm" id="add-deliv">+ Add Deliverable</button>'+
+    '</div>'+
+    '<div class="gt-head deliv-grid"><div>Deliverable Name</div><div>Format / Aspect Ratio</div><div>Duration / Length</div><div class="right">Qty</div><div></div></div>'+
+    '<div class="gt-body" id="tbody-deliverables"><div class="empty-row">No deliverables added yet — click “+ Add Deliverable” above.</div></div>'+
+  '</div>';
+}
+function labourSectionHTML(sec){
+  var opts=sec.rows.map(function(r){return'<option value="'+esc(r.name)+'">'+esc(r.name)+'</option>';}).join('');
+  return'<div class="billing-block">'+
+    '<div class="bb-head"><div><span class="bb-label">'+esc(sec.label)+'</span><span class="bb-label-tag">Labour</span></div>'+
+    '<span class="bb-sum">Subtotal <b id="sum-'+sec.id+'">$0.00</b></span></div>'+
+    '<div class="bb-picker"><select class="svc-select" id="sel-'+sec.id+'">'+opts+'</select>'+
+    '<button type="button" class="btn btn-accent btn-sm" id="add-'+sec.id+'">+ Add Service</button></div>'+
+    '<div class="gt-head labour-grid"><div>Service</div><div class="right">Hours</div><div class="right">Rate</div><div class="right">Mark-Up</div><div class="right">Client Bill</div><div></div></div>'+
+    '<div class="gt-body" id="tbody-'+sec.id+'"><div class="empty-row">No services added. Use the selector above to add one.</div></div></div>';
+}
+function travelSectionHTML(){
+  var opts=travelRows.map(function(r){return'<option value="'+esc(r.name)+'">'+esc(r.name)+'</option>';}).join('');
+  return'<div class="billing-block">'+
+    '<div class="bb-head"><div><span class="bb-label">Travel &amp; Accommodation</span><span class="bb-label-tag">Expenses</span></div>'+
+    '<span class="bb-sum">Subtotal <b id="sum-travel">$0.00</b></span></div>'+
+    '<div class="bb-picker"><select class="svc-select" id="sel-travel">'+opts+'</select>'+
+    '<button type="button" class="btn btn-accent btn-sm" id="add-travel">+ Add Item</button></div>'+
+    '<div class="gt-head expense-grid"><div>Service</div><div class="right">Qty / Cost</div><div class="right">Rate</div><div class="right">Mark-Up</div><div class="right">Client Bill</div><div></div></div>'+
+    '<div class="gt-body" id="tbody-travel"><div class="empty-row">No items added. Use the selector above to add one.</div></div></div>';
+}
+function equipSectionHTML(){
+  return'<div class="billing-block">'+
+    '<div class="bb-head"><div><span class="bb-label">Equipment Hire</span><span class="bb-label-tag">Expenses</span></div>'+
+    '<span class="bb-sum">Subtotal <b id="sum-equip">$0.00</b></span></div>'+
+    '<div class="bb-picker"><button type="button" class="btn btn-accent btn-sm" id="add-equip">+ Add Equipment Item</button></div>'+
+    '<div class="gt-head expense-grid"><div>Vendor / Item</div><div class="right">Days</div><div class="right">Cost/Day</div><div class="right">—</div><div class="right">Total</div><div></div></div>'+
+    '<div class="gt-body" id="tbody-equip"><div class="empty-row">No equipment added. Click above to add an item.</div></div></div>';
+}
+function crewSectionHTML(){
+  return'<div class="billing-block">'+
+    '<div class="bb-head"><div><span class="bb-label">External Crew &amp; Contracts</span><span class="bb-label-tag">Expenses</span></div>'+
+    '<span class="bb-sum">Subtotal <b id="sum-crew">$0.00</b></span></div>'+
+    '<div class="bb-picker"><button type="button" class="btn btn-accent btn-sm" id="add-crew">+ Add Crew Member</button></div>'+
+    '<div class="gt-head expense-grid"><div>Role / Name</div><div class="right">Days</div><div class="right">Day Rate</div><div class="right">—</div><div class="right">Total</div><div></div></div>'+
+    '<div class="gt-body" id="tbody-crew"><div class="empty-row">No crew added. Click above to add a member.</div></div></div>';
+}
+
+// ── FORM ──────────────────────────────────────────────────────────────────────
+function renderForm(el){
+  rowCounter=0;
+  var p=editProj;
+  var html='<button class="back-btn" id="js-back">← Back</button>'+
+  '<div class="page-head"><div><div class="page-title">'+(p?'Edit Estimate':'New Estimate')+'</div>'+
+  '<div class="page-sub">Select services from each category to build your estimate</div></div></div>'+
+  '<div class="form-grid">'+
+    '<div class="field full"><label style="color:var(--accent)">UPID — Unique Project Identifier *</label>'+
+    '<input id="f-upid" type="text" class="upid-field" value="'+esc(p?p.upid:'')+'"></div>'+
+    '<div class="field"><label>Project Name *</label><input id="f-name" type="text" value="'+esc(p?p.name:'')+'"></div>'+
+    '<div class="field"><label>Date</label><input id="f-date" type="date" value="'+(p?p.date:today())+'"></div>'+
+    '<div class="field"><label>Business Name</label><input id="f-business" type="text" value="'+esc(p?p.businessName||'':'')+'"></div>'+
+    '<div class="field"><label>Client Name</label><input id="f-clientname" type="text" value="'+esc(p?p.clientName||'':'')+'"></div>'+
+    '<div class="field full"><label>Client Email</label><input id="f-clientemail" type="email" value="'+esc(p?p.clientEmail||'':'')+'"></div>'+
+    '<div class="field full"><label>Internal Notes</label><textarea id="f-notes">'+esc(p?p.notes||'':'')+'</textarea></div>'+
+  '</div>'+
+  '<div class="doc-type-bar">'+
+    '<span class="doc-type-label">Document Type</span>'+
+    '<select class="doc-type-select" id="f-doctype">'+
+      '<option value="estimate"'+(p&&p.docType==='invoice'?'':' selected')+'>Estimate</option>'+
+      '<option value="invoice"'+(p&&p.docType==='invoice'?' selected':'')+'>Invoice</option>'+
+    '</select>'+
+    '<div class="inv-num-wrap'+(p&&p.docType==='invoice'?' show':'')+'" id="inv-num-wrap">'+
+      '<label style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)">Invoice #</label>'+
+      '<input class="inv-num-inp" id="f-invnum" type="text" placeholder="e.g. INV-001" value="'+esc(p&&p.invoiceNumber||'')+'">'+
+    '</div>'+
+  '</div>';
+
+  html+=deliverablesSectionHTML();
+  labourSections.forEach(function(sec){html+=labourSectionHTML(sec);});
+  html+=travelSectionHTML()+crewSectionHTML()+equipSectionHTML();
+
+  html+=
+  '<div class="summary-bar">'+
+    '<div class="sum-item"><div class="sum-label">Total Hours</div><div class="sum-value" id="s-hrs">0</div></div>'+
+    '<div class="sum-item"><div class="sum-label">Labour Subtotal</div><div class="sum-value" id="s-labour">$0.00</div></div>'+
+    '<div class="sum-item"><div class="sum-label">Expenses Subtotal</div><div class="sum-value" id="s-expenses">$0.00</div></div>'+
+    '<div class="sum-item" style="background:rgba(184,84,68,0.08);border:1px solid rgba(184,84,68,0.3)">'+
+      '<div class="sum-label" style="color:var(--accent)">Net Invoice</div>'+
+      '<div class="sum-value accent" id="s-net">$0.00</div>'+
+    '</div>'+
+    '<div class="sum-item"><div class="sum-label">Internal Tax (35%)</div><div class="sum-value" id="s-tax" style="font-size:15px">$0.00</div></div>'+
+  '</div>'+
+  '<div class="summary-bar" style="margin-bottom:24px">'+
+    '<div class="sum-item" style="grid-column:span 5">'+
+      '<div class="sum-label">Gross Profit <span style="font-size:9px;color:var(--muted2)">(Net Invoice − 35% Labour Tax — Expenses EXEMPT)</span></div>'+
+      '<div class="sum-value" id="s-gross" style="color:#6fcf6f">$0.00</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="form-actions">'+
+    (p?'<button class="btn btn-danger btn-sm" id="js-del">Delete</button>':'')+
+    '<button class="btn btn-ghost" id="js-cancel">Cancel</button>'+
+    '<button class="btn btn-accent" id="js-save">Save Estimate</button>'+
+  '</div>';
+
+  el.innerHTML=html;
+  if(p&&p.activeRows)restoreRows(p.activeRows);
+  bindFormGlobal(el);
+  recalc();
+}
+
+function restoreRows(ar){
+  labourSections.forEach(function(sec){
+    (ar[sec.id]||[]).forEach(function(saved){
+      var rowDef=sec.rows.find(function(r){return r.name===saved.name;});
+      if(!rowDef)return;
+      injectRow($id('tbody-'+sec.id),buildLabourRow(rowDef,saved.qty,saved.override));
+    });
+  });
+  (ar.travel||[]).forEach(function(saved){
+    var rowDef=travelRows.find(function(r){return r.name===saved.name;});
+    if(!rowDef)return;
+    injectRow($id('tbody-travel'),buildTravelRow(rowDef,saved.qty));
+  });
+  (ar.equip||[]).forEach(function(eq){injectRow($id('tbody-equip'),buildEquipRow(eq.vendor,eq.days,eq.cost));});
+  (ar.crew||[]).forEach(function(cr){injectRow($id('tbody-crew'),buildCrewRow(cr.role,cr.days,cr.cost));});
+  (ar.deliverables||[]).forEach(function(d){injectRow($id('tbody-deliverables'),buildDeliverableRow(d.name,d.format,d.duration,d.qty));});
+}
+
+function bindFormGlobal(el){
+  $id('js-back').addEventListener('click',function(){view='list';render();});
+  $id('js-cancel').addEventListener('click',function(){view='list';render();});
+  $id('js-save').addEventListener('click',saveProject);
+  var del=$id('js-del');if(del)del.addEventListener('click',deleteProject);
+  var dtSel=$id('f-doctype');var invWrap=$id('inv-num-wrap');
+  if(dtSel){dtSel.addEventListener('change',function(){if(invWrap)invWrap.classList.toggle('show',this.value==='invoice');});}
+
+  labourSections.forEach(function(sec){
+    var btn=$id('add-'+sec.id);
+    if(btn)btn.addEventListener('click',function(){
+      var sel=$id('sel-'+sec.id);
+      var rowDef=sec.rows.find(function(r){return r.name===(sel&&sel.value);});
+      if(rowDef)injectRow($id('tbody-'+sec.id),buildLabourRow(rowDef,0,0));
+    });
+  });
+  var addTravel=$id('add-travel');
+  if(addTravel)addTravel.addEventListener('click',function(){
+    var sel=$id('sel-travel');
+    var rowDef=travelRows.find(function(r){return r.name===(sel&&sel.value);});
+    if(rowDef)injectRow($id('tbody-travel'),buildTravelRow(rowDef,0));
+  });
+  var addEquip=$id('add-equip');
+  if(addEquip)addEquip.addEventListener('click',function(){injectRow($id('tbody-equip'),buildEquipRow('',0,0));});
+  var addCrew=$id('add-crew');
+  if(addCrew)addCrew.addEventListener('click',function(){injectRow($id('tbody-crew'),buildCrewRow('',0,0));});
+  var addDeliv=$id('add-deliv');
+  if(addDeliv)addDeliv.addEventListener('click',function(){injectRow($id('tbody-deliverables'),buildDeliverableRow('','','',1));});
+}
+
+// ── COLLECT & SAVE ────────────────────────────────────────────────────────────
+function collectActiveRows(){
+  var ar={travel:[],equip:[],crew:[],deliverables:[]};
+  labourSections.forEach(function(sec){
+    ar[sec.id]=[];
+    var tbody=$id('tbody-'+sec.id);if(!tbody)return;
+    tbody.querySelectorAll('[data-rid]').forEach(function(tr){
+      var qInp=tr.querySelector('.qty-inp');
+      var cInp=tr.querySelector('.custom-bill-inp');
+      ar[sec.id].push({name:tr.firstElementChild&&tr.firstElementChild.textContent.trim(),qty:parseFloat(qInp&&qInp.value)||0,override:parseFloat(cInp&&cInp.value)||0});
+    });
+  });
+  var ttbody=$id('tbody-travel');
+  if(ttbody)ttbody.querySelectorAll('[data-rid]').forEach(function(tr){
+    var qInp=tr.querySelector('.qty-inp');
+    ar.travel.push({name:tr.firstElementChild&&tr.firstElementChild.textContent.trim(),qty:parseFloat(qInp&&qInp.value)||0});
+  });
+  var etbody=$id('tbody-equip');
+  if(etbody)etbody.querySelectorAll('[data-rid]').forEach(function(tr){
+    ar.equip.push({vendor:(tr.querySelector('.vendor-inp')&&tr.querySelector('.vendor-inp').value)||'',days:parseFloat(tr.querySelector('.days-inp')&&tr.querySelector('.days-inp').value)||0,cost:parseFloat(tr.querySelector('.cost-inp')&&tr.querySelector('.cost-inp').value)||0});
+  });
+  var ctbody=$id('tbody-crew');
+  if(ctbody)ctbody.querySelectorAll('[data-rid]').forEach(function(tr){
+    ar.crew.push({role:(tr.querySelector('.role-inp')&&tr.querySelector('.role-inp').value)||'',days:parseFloat(tr.querySelector('.days-inp')&&tr.querySelector('.days-inp').value)||0,cost:parseFloat(tr.querySelector('.cost-inp')&&tr.querySelector('.cost-inp').value)||0});
+  });
+  var dtbody=$id('tbody-deliverables');
+  if(dtbody)dtbody.querySelectorAll('[data-rid]').forEach(function(tr){
+    ar.deliverables.push({name:(tr.querySelector('.deliv-name-inp')&&tr.querySelector('.deliv-name-inp').value)||'',format:(tr.querySelector('.deliv-fmt-inp')&&tr.querySelector('.deliv-fmt-inp').value)||'',duration:(tr.querySelector('.deliv-dur-inp')&&tr.querySelector('.deliv-dur-inp').value)||'',qty:parseFloat(tr.querySelector('.deliv-qty-inp')&&tr.querySelector('.deliv-qty-inp').value)||1});
+  });
+  return ar;
+}
+
+function computeTotals(ar){
+  var labourTotal=0,expenseTotal=0,totalHours=0;
+  labourSections.forEach(function(sec){
+    (ar[sec.id]||[]).forEach(function(saved){
+      var rd=sec.rows.find(function(r){return r.name===saved.name;});if(!rd)return;
+      totalHours+=saved.qty||0;
+      labourTotal+=saved.override>0?saved.override:(saved.qty||0)*rd.mu;
+    });
+  });
+  (ar.travel||[]).forEach(function(saved){
+    var rd=travelRows.find(function(r){return r.name===saved.name;});if(!rd)return;
+    expenseTotal+=rd.directCost?(saved.qty||0):(saved.qty||0)*rd.mu;
+  });
+  (ar.equip||[]).forEach(function(eq){expenseTotal+=(eq.days||0)*(eq.cost||0);});
+  (ar.crew||[]).forEach(function(cr){expenseTotal+=(cr.days||0)*(cr.cost||0);});
+  var net=labourTotal+expenseTotal,tax=labourTotal*TAX_RATE;
+  return{labourTotal:labourTotal,expenseTotal:expenseTotal,net:net,tax:tax,grossProfit:net-tax,totalHours:totalHours};
+}
+
+function saveProject(){
+  var name=($id('f-name')&&$id('f-name').value||'').trim();
+  if(!name){alert('Please enter a Project Name.');return;}
+  var upid=($id('f-upid')&&$id('f-upid').value||'').trim();
+  if(!upid){alert('Please enter a UPID.');return;}
+  var ar=collectActiveRows(),t=computeTotals(ar);
+  var proj={id:editProj?editProj.id:nextId++,upid:upid,name:name,
+    businessName:($id('f-business')&&$id('f-business').value||'').trim(),
+    clientName:($id('f-clientname')&&$id('f-clientname').value||'').trim(),
+    clientEmail:($id('f-clientemail')&&$id('f-clientemail').value||'').trim(),
+    date:$id('f-date')&&$id('f-date').value||'',
+    notes:($id('f-notes')&&$id('f-notes').value||'').trim(),
+    docType:($id('f-doctype')&&$id('f-doctype').value)||'estimate',
+    invoiceNumber:($id('f-invnum')&&$id('f-invnum').value||'').trim(),
+    activeRows:ar,net:t.net,labourTotal:t.labourTotal,expenseTotal:t.expenseTotal,
+    tax:t.tax,grossProfit:t.grossProfit,totalHours:t.totalHours};
+  if(editProj){var idx=projects.findIndex(function(x){return x.id===proj.id;});if(idx!==-1)projects[idx]=proj;else projects.unshift(proj);}
+  else projects.unshift(proj);
+  editProj=null;viewingId=proj.id;view='estimate';render();
+}
+function deleteProject(){
+  if(!editProj||!confirm('Delete this estimate?'))return;
+  projects=projects.filter(function(x){return x.id!==editProj.id;});
+  editProj=null;view='list';render();
+}
+
+// ── ESTIMATE VIEW ─────────────────────────────────────────────────────────────
+function renderEstimate(el){
+  var proj=projects.find(function(p){return p.id===viewingId;});
+  if(!proj){view='list';render();return;}
+  var idx=projects.findIndex(function(p){return p.id===viewingId;});
+  var ar=proj.activeRows||{};
+  var html='<button class="back-btn" id="js-back">← Back</button>'+
+    '<div class="est-header"><div>'+
+      '<div class="est-upid">'+esc(proj.upid||'—')+(proj.docType==='invoice'?' &nbsp;<span style="font-size:9px;padding:2px 7px;border:1px solid var(--accent);color:var(--accent);letter-spacing:.05em">INVOICE '+esc(proj.invoiceNumber||'—')+'</span>':'')+'</div>'+
+      '<div style="color:var(--muted);font-size:11px;margin-bottom:4px">'+esc(proj.date||'')+'</div>'+
+      '<div class="est-name">'+esc(proj.name)+'</div>'+
+      (proj.businessName?'<div class="est-client">'+esc(proj.businessName)+'</div>':'')+
+      (proj.clientName?'<div class="est-client" style="margin-top:2px">'+esc(proj.clientName)+(proj.clientEmail?' &nbsp;&middot;&nbsp; <span style="color:var(--accent)">'+esc(proj.clientEmail)+'</span>':'')+'</div>':'')+
+    '</div>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+      '<button class="btn btn-ghost btn-sm" id="js-edit">Edit</button>'+
+      '<button class="btn btn-accent btn-sm" id="js-export"><span class="spinner" id="exp-spin"></span>↑ '+(proj.docType==='invoice'?'Export Client Invoice':'Export Quote PDF')+'</button>'+
+    '</div></div>';
+  labourSections.forEach(function(sec){
+    var rows=(ar[sec.id]||[]).filter(function(s){return(s.qty||0)>0;});if(!rows.length)return;
+    var ss=0,rh='';
+    rows.forEach(function(saved){
+      var rd=sec.rows.find(function(r){return r.name===saved.name;});if(!rd)return;
+      var bill=saved.override>0?saved.override:(saved.qty||0)*rd.mu;ss+=bill;
+      rh+='<tr><td>'+esc(saved.name)+'</td><td class="right muted-td">'+saved.qty+'</td><td class="right muted-td">'+(rd.rate>0?fmt(rd.rate):'—')+'</td><td class="right muted-td">'+fmt(rd.mu)+'</td><td class="right bill">'+fmt(bill)+'</td></tr>';
+    });
+    html+='<div class="est-block"><div class="est-block-head"><span class="est-block-label">'+esc(sec.label)+'</span><span class="est-block-sum">'+fmt(ss)+'</span></div>'+
+      '<table class="est-table"><thead><tr><th>Service</th><th class="right">Hours</th><th class="right">Rate</th><th class="right">Mark-Up</th><th class="right">Bill</th></tr></thead><tbody>'+rh+'</tbody></table></div>';
+  });
+  var eqRows=(ar.equip||[]).filter(function(e){return(e.days||0)*(e.cost||0)>0||e.vendor;});
+  if(eqRows.length){
+    var ess=eqRows.reduce(function(a,e){return a+(e.days||0)*(e.cost||0);},0);
+    html+='<div class="est-block"><div class="est-block-head"><span class="est-block-label">Equipment Hire</span><span class="est-block-sum">'+fmt(ess)+'</span></div>'+
+      '<table class="est-table"><thead><tr><th>Vendor / Item</th><th class="right">Days</th><th class="right">Cost/Day</th><th class="right">Total</th></tr></thead><tbody>'+
+      eqRows.map(function(e){return'<tr><td>'+esc(e.vendor||'Equipment')+'</td><td class="right muted-td">'+esc(e.days||0)+'</td><td class="right muted-td">'+fmt(e.cost)+'</td><td class="right bill">'+fmt((e.days||0)*(e.cost||0))+'</td></tr>';}).join('')+
+      '</tbody></table></div>';
+  }
+  var tvRows=(ar.travel||[]).filter(function(t){return(t.qty||0)>0;});
+  if(tvRows.length){
+    var tss=tvRows.reduce(function(a,s){var rd=travelRows.find(function(r){return r.name===s.name;});return a+(rd?rd.directCost?(s.qty||0):(s.qty||0)*rd.mu:0);},0);
+    html+='<div class="est-block"><div class="est-block-head"><span class="est-block-label">Travel &amp; Accommodation</span><span class="est-block-sum">'+fmt(tss)+'</span></div>'+
+      '<table class="est-table"><thead><tr><th>Service</th><th class="right">Qty</th><th class="right">Rate</th><th class="right">Bill</th></tr></thead><tbody>'+
+      tvRows.map(function(s){var rd=travelRows.find(function(r){return r.name===s.name;});var bill=rd?rd.directCost?(s.qty||0):(s.qty||0)*rd.mu:0;return'<tr><td>'+esc(s.name)+'</td><td class="right muted-td">'+s.qty+'</td><td class="right muted-td">'+(rd&&!rd.directCost?fmt(rd.mu):'—')+'</td><td class="right bill">'+fmt(bill)+'</td></tr>';}).join('')+
+      '</tbody></table></div>';
+  }
+  var crRows=(ar.crew||[]).filter(function(c){return(c.days||0)*(c.cost||0)>0||c.role;});
+  if(crRows.length){
+    var css2=crRows.reduce(function(a,c){return a+(c.days||0)*(c.cost||0);},0);
+    html+='<div class="est-block"><div class="est-block-head"><span class="est-block-label">External Crew &amp; Contracts</span><span class="est-block-sum">'+fmt(css2)+'</span></div>'+
+      '<table class="est-table"><thead><tr><th>Role / Name</th><th class="right">Days</th><th class="right">Day Rate</th><th class="right">Total</th></tr></thead><tbody>'+
+      crRows.map(function(c){return'<tr><td>'+esc(c.role||'Crew')+'</td><td class="right muted-td">'+esc(c.days||0)+'</td><td class="right muted-td">'+fmt(c.cost)+'</td><td class="right bill">'+fmt((c.days||0)*(c.cost||0))+'</td></tr>';}).join('')+
+      '</tbody></table></div>';
+  }
+  var delivRows=(proj.activeRows&&proj.activeRows.deliverables||[]).filter(function(d){return d.name;});
+  if(delivRows.length){
+    html+='<div class="est-block"><div class="est-block-head"><span class="est-block-label">Deliverables</span><span class="est-block-sum" style="color:var(--muted)">'+delivRows.length+' item'+(delivRows.length!==1?'s':'')+'</span></div>'+
+      '<table class="est-table"><thead><tr><th>Deliverable</th><th class="right">Format</th><th class="right">Duration</th><th class="right">Qty</th></tr></thead><tbody>'+
+      delivRows.map(function(d){return'<tr><td>'+esc(d.name)+'</td><td class="right muted-td">'+esc(d.format||'—')+'</td><td class="right muted-td">'+esc(d.duration||'—')+'</td><td class="right muted-td">'+esc(String(d.qty||1))+'</td></tr>';}).join('')+
+      '</tbody></table></div>';
+  }
+  html+='<div class="est-totals">'+
+    '<div class="totals-card"><table>'+
+      '<tr><td class="tl">Labour Subtotal</td><td class="tv">'+fmt(proj.labourTotal||0)+'</td></tr>'+
+      '<tr><td class="tl">Expenses Subtotal</td><td class="tv">'+fmt(proj.expenseTotal||0)+'</td></tr>'+
+      '<tr class="net-row"><td>Net Invoice</td><td class="tv">'+fmt(proj.net)+'</td></tr>'+
+      '<tr><td class="tl">Internal Tax (35% Labour)</td><td class="tv">'+fmt(proj.tax||0)+'</td></tr>'+
+      '<tr><td class="tl" style="color:#6fcf6f">Gross Profit</td><td class="tv" style="color:#6fcf6f">'+fmt(proj.grossProfit||0)+'</td></tr>'+
+      '<tr><td class="tl">Total Hours</td><td class="tv">'+proj.totalHours+'</td></tr>'+
+    '</table></div>'+
+    '<div class="notes-card"><h4>Internal Notes</h4><p>'+(proj.notes?esc(proj.notes):'<em style="color:var(--muted2)">No notes added.</em>')+'</p>'+
+
+    '</div></div>';
+  el.innerHTML=html;
+  $id('js-back').addEventListener('click',function(){view='list';render();});
+  $id('js-edit').addEventListener('click',function(){editProj=proj;view='form';render();});
+  $id('js-export').addEventListener('click',function(){doExport(proj,idx);});
+}
+
+// ── LOGO ───────────────────────────────────────────────────────────────────────
+// To use your own logo: base64 -i logo.png | tr -d '\n'  → paste result below.
+var LOGO_B64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+// ── PDF BUILDERS ──────────────────────────────────────────────────────────────
+function buildClientPDF(proj){
+  var ar=proj.activeRows||{};
+  var serviceItems='';
+  labourSections.forEach(function(sec){
+    var rows=(ar[sec.id]||[]).filter(function(s){return(s.qty||0)>0;});if(!rows.length)return;
+    serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0">'+
+      '<div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">'+esc(sec.label)+'</div>';
+    rows.forEach(function(s){serviceItems+='<div style="font-size:10.5pt;font-weight:600;color:#0E0E0E;margin-bottom:3px">'+esc(s.name)+'</div>';});
+    serviceItems+='</div>';
+  });
+  var eqActive=(ar.equip||[]).filter(function(e){return e.vendor||(e.days&&e.cost);});
+  if(eqActive.length){serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">Equipment Hire</div><div style="font-size:10.5pt;font-weight:600;color:#0E0E0E;margin-bottom:3px">Equipment Hire</div></div>';}
+  var tvActive=(ar.travel||[]).filter(function(t){return(t.qty||0)>0;});
+  if(tvActive.length){serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">Travel &amp; Accommodation</div>'+tvActive.map(function(s){return'<div style="font-size:10pt;color:#0E0E0E;margin-bottom:2px">'+esc(s.name)+'</div>';}).join('')+'</div>';}
+  var crActive=(ar.crew||[]).filter(function(c){return c.role||(c.days&&c.cost);});
+  if(crActive.length){serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">External Crew &amp; Contracts</div>'+crActive.map(function(c){return'<div style="font-size:10pt;color:#0E0E0E;margin-bottom:2px">'+esc(c.role||'Crew Member')+'</div>';}).join('')+'</div>';}
+  return'<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:11pt;color:#0E0E0E;background:#fff;padding:40px 48px;max-width:740px;margin:0 auto}.sh{font-size:8pt;text-transform:uppercase;letter-spacing:.28em;color:#C0603C;font-weight:700;margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid rgba(192,96,60,0.25)}</style></head><body>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid #0E0E0E">'+
+      (LOGO_B64?'<img src="data:image/png;base64,'+LOGO_B64+'" style="height:76px;width:auto;object-fit:contain;display:block">':'<div><div style="font-size:22pt;font-weight:900;letter-spacing:.02em">LSC CREATIVE<span style="color:#C0603C">.</span></div><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.12em;color:#7A7470;margin-top:4px">Motion Productions</div></div>')+
+      '<div style="text-align:right"><div style="font-size:13pt;font-weight:700;color:#C0603C;letter-spacing:.04em">'+esc(proj.upid||'—')+'</div>'+
+      '<div style="font-size:9pt;color:#7A7470;margin-top:2px">'+esc(proj.date||'')+'</div>'+
+      '<div style="font-size:15pt;font-weight:800;color:#0E0E0E;margin-top:6px">'+esc(proj.name)+'</div>'+
+      (proj.businessName?'<div style="font-size:10pt;color:#3A4756;margin-top:3px;font-weight:500">'+esc(proj.businessName)+'</div>':'')+
+      (proj.clientName?'<div style="font-size:9.5pt;color:#7A7470;margin-top:2px">'+esc(proj.clientName)+(proj.clientEmail?' &middot; '+esc(proj.clientEmail):'')+'</div>':'')+
+      '</div></div>'+
+    (function(){
+      var drows=(proj.activeRows&&proj.activeRows.deliverables||[]).filter(function(d){return d.name;});
+      if(!drows.length)return'';
+      return'<div style="margin-bottom:28px"><div class="sh">Deliverables</div>'+
+        '<table style="width:100%;border-collapse:collapse;font-size:10pt"><thead><tr style="background:#F2F0EC">'+
+          '<th style="text-align:left;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Deliverable</th>'+
+          '<th style="text-align:right;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Format</th>'+
+          '<th style="text-align:right;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Duration</th>'+
+          '<th style="text-align:right;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Qty</th>'+
+        '</tr></thead><tbody>'+
+        drows.map(function(d,i){var bg=i%2===0?'#fff':'#F7F5F2';return'<tr style="background:'+bg+'"><td style="padding:8px 12px;font-weight:600;color:#0E0E0E">'+esc(d.name)+'</td><td style="text-align:right;padding:8px 12px;color:#555">'+esc(d.format||'—')+'</td><td style="text-align:right;padding:8px 12px;color:#555">'+esc(d.duration||'—')+'</td><td style="text-align:right;padding:8px 12px;font-weight:700;color:#C0603C">'+esc(String(d.qty||1))+'</td></tr>';}).join('')+
+        '</tbody></table></div>';
+    })()+
+
+    '<div style="margin-bottom:28px"><div class="sh">What Goes Into This Project</div>'+serviceItems+'</div>'+
+    '<div style="margin-bottom:28px"><div class="sh">Your Investment</div>'+
+      '<div style="border:1px solid #E8E2D9;display:inline-block;min-width:290px"><table style="width:100%;border-collapse:collapse"><tr style="background:#0E0E0E">'+
+        '<td style="padding:13px 16px;font-size:13pt;font-weight:800;color:#fff">Project Total <span style="font-size:9pt;font-weight:400;color:#aaa">inc. all services</span></td>'+
+        '<td style="padding:13px 16px;text-align:right;font-size:15pt;font-weight:900;color:#C0603C">'+fmt(proj.net)+'</td>'+
+      '</tr></table></div>'+
+      '<div style="margin-top:10px;font-size:8.5pt;color:#aaa">All prices in AUD. GST not included. Quote valid for 30 days from issue date.</div></div>'+
+    '<div style="margin-top:36px;padding-top:20px;border-top:1px solid #E8E2D9">'+
+      '<div style="font-size:10.5pt;color:#0E0E0E;line-height:2.1">If you have any questions or want to chat through this estimate, please reach out.<br><br>'+
+      '<strong>Lachlan Sullivan-Carey</strong><br>lachlan@creativelsc.com<br>04 12 710 836</div>'+
+    '</div></body></html>';
+}
+
+
+// ── INVOICE PDF BUILDER ────────────────────────────────────────────────────────────────────────────
+function buildClientInvoicePDF(proj){
+  var ar=proj.activeRows||{};
+  var serviceItems='';
+  labourSections.forEach(function(sec){
+    var rows=(ar[sec.id]||[]).filter(function(s){return(s.qty||0)>0;});if(!rows.length)return;
+    serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0">'+
+      '<div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">'+esc(sec.label)+'</div>';
+    rows.forEach(function(s){serviceItems+='<div style="font-size:10.5pt;font-weight:600;color:#0E0E0E;margin-bottom:3px">'+esc(s.name)+'</div>';});
+    serviceItems+='</div>';
+  });
+  var eqActive=(ar.equip||[]).filter(function(e){return e.vendor||(e.days&&e.cost);});
+  if(eqActive.length){serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">Equipment Hire</div><div style="font-size:10.5pt;font-weight:600;color:#0E0E0E;margin-bottom:3px">Equipment Hire</div></div>';}
+  var tvActive=(ar.travel||[]).filter(function(t){return(t.qty||0)>0;});
+  if(tvActive.length){serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">Travel &amp; Accommodation</div>'+tvActive.map(function(s){return'<div style="font-size:10pt;color:#0E0E0E;margin-bottom:2px">'+esc(s.name)+'</div>';}).join('')+'</div>';}
+  var crActive=(ar.crew||[]).filter(function(c){return c.role||(c.days&&c.cost);});
+  if(crActive.length){serviceItems+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:#C0603C;font-weight:700;margin-bottom:5px">External Crew &amp; Contracts</div>'+crActive.map(function(c){return'<div style="font-size:10pt;color:#0E0E0E;margin-bottom:2px">'+esc(c.role||'Crew Member')+'</div>';}).join('')+'</div>';}
+  var invSettings=loadInvoiceSettings();
+  var payBlock='';
+  if(invSettings.bankName||invSettings.accountName||invSettings.bsb||invSettings.accountNumber||invSettings.paymentTerms){
+    payBlock='<div style="margin-top:28px;padding-top:20px;border-top:2px solid #0E0E0E">'+
+      '<div style="font-size:8pt;text-transform:uppercase;letter-spacing:.28em;color:#C0603C;font-weight:700;margin-bottom:14px;padding-bottom:6px;border-bottom:2px solid #0E0E0E">Payment Details</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:10.5pt"><tbody>'+
+      (invSettings.bankName?'<tr><td style="padding:5px 0;color:#7A7470;width:160px">Bank</td><td style="padding:5px 0;font-weight:600;color:#0E0E0E">'+esc(invSettings.bankName)+'</td></tr>':'')+
+      (invSettings.accountName?'<tr><td style="padding:5px 0;color:#7A7470">Account Name</td><td style="padding:5px 0;font-weight:600;color:#0E0E0E">'+esc(invSettings.accountName)+'</td></tr>':'')+
+      (invSettings.bsb?'<tr><td style="padding:5px 0;color:#7A7470">BSB</td><td style="padding:5px 0;font-weight:600;color:#0E0E0E">'+esc(invSettings.bsb)+'</td></tr>':'')+
+      (invSettings.accountNumber?'<tr><td style="padding:5px 0;color:#7A7470">Account Number</td><td style="padding:5px 0;font-weight:600;color:#0E0E0E">'+esc(invSettings.accountNumber)+'</td></tr>':'')+
+      '</tbody></table>'+
+      (invSettings.paymentTerms?'<div style="margin-top:12px;padding:12px 16px;background:#FBF9F7;border-left:3px solid #C0603C"><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.08em;color:#7A7470;margin-bottom:4px;font-weight:700">Payment Terms</div><div style="font-size:10pt;color:#0E0E0E;line-height:1.6">'+esc(invSettings.paymentTerms)+'</div></div>':'')+
+    '</div>';
+  }
+  var drows=(proj.activeRows&&proj.activeRows.deliverables||[]).filter(function(d){return d.name;});
+  var delivTable='';
+  if(drows.length){
+    delivTable='<div style="margin-bottom:28px"><div class="sh">Deliverables</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:10pt"><thead><tr style="background:#F2F0EC">'+
+        '<th style="text-align:left;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Deliverable</th>'+
+        '<th style="text-align:right;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Format</th>'+
+        '<th style="text-align:right;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Duration</th>'+
+        '<th style="text-align:right;padding:8px 12px;font-size:8pt;text-transform:uppercase;color:#7A7470;border-bottom:1px solid #E8E2D9">Qty</th>'+
+      '</tr></thead><tbody>'+
+      drows.map(function(d,i){var bg=i%2===0?'#fff':'#F7F5F2';return'<tr style="background:'+bg+'"><td style="padding:8px 12px;font-weight:600;color:#0E0E0E">'+esc(d.name)+'</td><td style="text-align:right;padding:8px 12px;color:#555">'+esc(d.format||'—')+'</td><td style="text-align:right;padding:8px 12px;color:#555">'+esc(d.duration||'—')+'</td><td style="text-align:right;padding:8px 12px;font-weight:700;color:#C0603C">'+esc(String(d.qty||1))+'</td></tr>';}).join('')+
+      '</tbody></table></div>';
+  }
+  return'<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:11pt;color:#0E0E0E;background:#fff;padding:40px 48px;max-width:740px;margin:0 auto}.sh{font-size:8pt;text-transform:uppercase;letter-spacing:.28em;color:#C0603C;font-weight:700;margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid rgba(192,96,60,0.25)}</style></head><body>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid #0E0E0E">'+
+      (LOGO_B64?'<img src="data:image/png;base64,'+LOGO_B64+'" style="height:76px;width:auto;object-fit:contain;display:block">':'<div><div style="font-size:22pt;font-weight:900;letter-spacing:.02em">LSC CREATIVE<span style="color:#C0603C">.</span></div><div style="font-size:8pt;text-transform:uppercase;letter-spacing:.12em;color:#7A7470;margin-top:4px">Motion Productions</div></div>')+
+      '<div style="text-align:right">'+
+      '<div style="font-size:16pt;font-weight:900;color:#0E0E0E;letter-spacing:.02em">INVOICE <span style="color:#C0603C">'+esc(proj.invoiceNumber||'—')+'</span></div>'+
+      '<div style="font-size:9pt;color:#7A7470;margin-top:2px">'+esc(proj.date||'')+'</div>'+
+      '<div style="font-size:15pt;font-weight:800;color:#0E0E0E;margin-top:6px">'+esc(proj.name)+'</div>'+
+      (proj.businessName?'<div style="font-size:10pt;color:#3A4756;margin-top:3px;font-weight:500">'+esc(proj.businessName)+'</div>':'')+
+      (proj.clientName?'<div style="font-size:9.5pt;color:#7A7470;margin-top:2px">'+esc(proj.clientName)+(proj.clientEmail?' &middot; '+esc(proj.clientEmail):'')+'</div>':'')+
+      '</div></div>'+
+    delivTable+
+    '<div style="margin-bottom:28px"><div class="sh">What Goes Into This Project</div>'+serviceItems+'</div>'+
+    '<div style="margin-bottom:0"><div class="sh">Invoice Total</div>'+
+      '<div style="border:1px solid #e8e8e8;display:inline-block;min-width:290px"><table style="width:100%;border-collapse:collapse"><tr style="background:#0E0E0E">'+
+        '<td style="padding:13px 16px;font-size:13pt;font-weight:800;color:#fff">Project Total <span style="font-size:9pt;font-weight:400;color:#aaa">inc. all services</span></td>'+
+        '<td style="padding:13px 16px;text-align:right;font-size:15pt;font-weight:900;color:#C0603C">'+fmt(proj.net)+'</td>'+
+      '</tr></table></div>'+
+      '<div style="margin-top:10px;font-size:8.5pt;color:#aaa">All prices in AUD. GST not included.</div></div>'+
+    payBlock+
+    '</body></html>';
+}
+
+async function doExport(proj,idx){
+  var btn=$id('js-export'),spin=$id('exp-spin');
+  if(btn)btn.disabled=true;if(spin)spin.style.display='inline-block';
+  showToast('Generating PDF…','');
+  var isInvoice=proj.docType==='invoice';
+  var prefix=isInvoice?(proj.invoiceNumber||'INV'):(proj.upid||'EST-'+pad(idx+1));
+  var base=prefix+' - '+(proj.businessName||'Client')+' - '+proj.name;
+  try{
+    var pdfHtml=isInvoice?buildClientInvoicePDF(proj):buildClientPDF(proj);
+    var win=window.open('','_blank');
+    if(!win){showToast('⚠ Pop-up blocked — allow pop-ups for this site','err');return;}
+    win.document.write(pdfHtml);
+    win.document.close();
+    win.focus();
+    setTimeout(function(){
+      win.print();
+      showToast('✓ '+(isInvoice?'Invoice':'Quote')+' PDF ready — save from print dialog','ok',false);
+    },400);
+  }catch(e){showToast('⚠ Export failed: '+String(e),'err');}
+  if(btn)btn.disabled=false;if(spin)spin.style.display='none';
+}
+
+// ── PRICING ───────────────────────────────────────────────────────────────────
+function renderPricing(el){
+  var html='<div class="page-head"><div><div class="page-title">Pricing Settings</div>'+
+    '<div class="page-sub">Adjust rates and mark-ups — applied to all new estimates</div></div></div>'+
+    '<div class="tax-setting"><div><div class="sum-label" style="margin-bottom:4px">Internal Tax Rate (%)</div>'+
+    '<div style="color:var(--muted);font-size:11px">Applied to Labour Subtotal only. Expenses are 100% exempt.</div></div>'+
+    '<input type="number" id="tax-inp" min="0" max="100" step="0.5" value="'+(TAX_RATE*100).toFixed(1)+'"></div>'+
+    '<div class="pricing-grid">';
+  labourSections.forEach(function(sec,si){
+    html+='<div class="pricing-section"><div class="pricing-sec-head"><span class="pricing-sec-label">'+esc(sec.label)+'</span>'+
+      '<span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Labour</span></div>'+
+      '<table class="pricing-table"><thead><tr><th>Service</th><th style="text-align:right">Rate ($/hr)</th><th style="text-align:right">Mark-Up ($)</th></tr></thead><tbody>';
+    sec.rows.forEach(function(row,ri){
+      html+='<tr><td>'+esc(row.name)+'</td>'+
+        '<td style="text-align:right"><input type="number" min="0" step="0.01" value="'+row.rate+'" data-si="'+si+'" data-ri="'+ri+'" data-field="rate" data-type="labour"></td>'+
+        '<td style="text-align:right"><input type="number" min="0" step="0.01" value="'+row.mu+'" data-si="'+si+'" data-ri="'+ri+'" data-field="mu" data-type="labour"></td></tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  html+='<div class="pricing-section"><div class="pricing-sec-head"><span class="pricing-sec-label">Travel &amp; Accommodation</span>'+
+    '<span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Expenses</span></div>'+
+    '<table class="pricing-table"><thead><tr><th>Service</th><th style="text-align:right">Rate ($)</th><th style="text-align:right">Mark-Up ($)</th></tr></thead><tbody>';
+  travelRows.forEach(function(row,ri){
+    html+='<tr><td>'+esc(row.name)+'</td>'+
+      '<td style="text-align:right"><input type="number" min="0" step="0.01" value="'+row.rate+'" data-ri="'+ri+'" data-field="rate" data-type="travel"></td>'+
+      '<td style="text-align:right"><input type="number" min="0" step="0.01" value="'+row.mu+'" data-ri="'+ri+'" data-field="mu" data-type="travel"></td></tr>';
+  });
+  html+='</tbody></table></div></div>'+
+    '<div class="pricing-save-bar"><p>Rate changes apply to new estimates only. Expenses are tax-exempt.</p>'+
+    '<div style="display:flex;align-items:center;gap:12px"><span class="saved-msg" id="saved-msg">✓ Rates saved</span>'+
+    '<button class="btn btn-ghost btn-sm" id="js-reset">Reset Defaults</button>'+
+    '<button class="btn btn-accent" id="js-save-pricing">Save Rates</button></div></div>';
+  el.innerHTML=html;
+  qsa('.pricing-table input',el).forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var v=parseFloat(inp.value)||0;
+      if(inp.dataset.type==='labour')labourSections[parseInt(inp.dataset.si)].rows[parseInt(inp.dataset.ri)][inp.dataset.field]=v;
+      else if(inp.dataset.type==='travel')travelRows[parseInt(inp.dataset.ri)][inp.dataset.field]=v;
+    });
+  });
+  $id('tax-inp').addEventListener('input',function(){TAX_RATE=parseFloat(this.value)/100||0.35;});
+  $id('js-save-pricing').addEventListener('click',function(){var msg=$id('saved-msg');if(msg){msg.style.display='inline';setTimeout(function(){msg.style.display='none';},2500);}});
+  $id('js-reset').addEventListener('click',function(){
+    if(!confirm('Reset all rates to defaults?'))return;
+    labourSections=JSON.parse(JSON.stringify(DEFAULT_LABOUR));
+    travelRows=JSON.parse(JSON.stringify(DEFAULT_TRAVEL));
+    TAX_RATE=0.35;renderPricing(el);
+  });
+}
+
+// ── INVOICE SETTINGS MODAL ────────────────────────────────────────────────────────────────────────────
+function openInvoiceSettingsModal(){
+  var s=loadInvoiceSettings();
+  var f=$id('inv-bank-name');if(f)f.value=s.bankName||'';
+  var a=$id('inv-account-name');if(a)a.value=s.accountName||'';
+  var b=$id('inv-bsb');if(b)b.value=s.bsb||'';
+  var n=$id('inv-account-num');if(n)n.value=s.accountNumber||'';
+  var t=$id('inv-payment-terms');if(t)t.value=s.paymentTerms||'';
+  var overlay=$id('modal-invoice-settings');
+  if(overlay)overlay.classList.add('open');
+}
+function closeInvoiceSettingsModal(){
+  var overlay=$id('modal-invoice-settings');
+  if(overlay)overlay.classList.remove('open');
+}
+$id('btn-close-inv-settings').addEventListener('click',closeInvoiceSettingsModal);
+$id('btn-save-inv-settings').addEventListener('click',function(){
+  var s={
+    bankName:($id('inv-bank-name')&&$id('inv-bank-name').value||'').trim(),
+    accountName:($id('inv-account-name')&&$id('inv-account-name').value||'').trim(),
+    bsb:($id('inv-bsb')&&$id('inv-bsb').value||'').trim(),
+    accountNumber:($id('inv-account-num')&&$id('inv-account-num').value||'').trim(),
+    paymentTerms:($id('inv-payment-terms')&&$id('inv-payment-terms').value||'').trim()
+  };
+  saveInvoiceSettings(s);
+  closeInvoiceSettingsModal();
+  showToast('✓ Invoice settings saved','ok');
+});
+$id('modal-invoice-settings').addEventListener('click',function(e){
+  if(e.target===this)closeInvoiceSettingsModal();
+});
+
+render();
+})();
+</script>
+</body>
+</html>
