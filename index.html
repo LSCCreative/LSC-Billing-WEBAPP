@@ -189,6 +189,17 @@ button,input,textarea,select{font-family:'Funnel Sans','FunnelSans',sans-serif}
 .inv-num-wrap.show{display:flex}
 .inv-num-inp{background:var(--surface);border:1px solid var(--accent);color:var(--text);font-size:12px;padding:6px 10px;outline:none;width:130px;font-family:'Funnel Sans',sans-serif}
 .inv-num-inp:focus{border-color:var(--text)}
+.crm-add-form{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:28px}
+.crm-add-form .form-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:flex-end}
+.crm-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border)}
+.crm-table th{text-align:left;padding:9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600}
+.crm-table td{padding:11px 14px;font-size:12px;color:var(--text);border-bottom:1px solid var(--border)}
+.crm-table tbody tr:last-child td{border-bottom:none}
+.crm-table tbody tr:hover td{background:var(--row-hover)}
+.crm-select-wrap{margin-bottom:16px}
+.crm-select-wrap label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.crm-autofill{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;font-size:12px;outline:none;font-family:'Funnel Sans',sans-serif;cursor:pointer;border-radius:0}
+.crm-autofill:focus{border-color:var(--accent)}
 #share-panel{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 28px;display:none;align-items:center;gap:10px;z-index:200}
 #share-panel.active{display:flex}
 #share-url-input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:11px;padding:6px 10px;border-radius:4px;font-family:monospace;outline:none}
@@ -206,6 +217,7 @@ button,input,textarea,select{font-family:'Funnel Sans','FunnelSans',sans-serif}
   <div id="hdr-right">
     <button class="nav-link" id="nav-estimates">Estimates</button>
     <button class="nav-link" id="nav-pricing">Pricing</button>
+    <button class="nav-link" id="nav-crm">Clients</button>
     <button class="nav-link" id="nav-invoice-settings">Invoice Settings</button>
   </div>
 </header>
@@ -310,8 +322,9 @@ function showToast(msg,type,link){
 }
 
 function setNav(){
-  $id('nav-estimates').classList.toggle('active',view!=='pricing');
+  $id('nav-estimates').classList.toggle('active',view==='list'||view==='estimate'||view==='form');
   $id('nav-pricing').classList.toggle('active',view==='pricing');
+  $id('nav-crm').classList.toggle('active',view==='crm');
 }
 function render(){
   setNav();
@@ -320,6 +333,7 @@ function render(){
   else if(view==='form')renderForm(m);
   else if(view==='estimate')renderEstimate(m);
   else if(view==='pricing')renderPricing(m);
+  else if(view==='crm')renderCRM(m);
 }
 $id('logo-btn').addEventListener('click',function(){view='list';(function(){
   var _h=window.location.hash.replace('#','');
@@ -333,6 +347,7 @@ $id('logo-btn').addEventListener('click',function(){view='list';(function(){
 render();});
 $id('nav-estimates').addEventListener('click',function(){view='list';render();});
 $id('nav-pricing').addEventListener('click',function(){view='pricing';render();});
+$id('nav-crm').addEventListener('click',function(){view='crm';render();});
 $id('nav-invoice-settings').addEventListener('click',function(){openInvoiceSettingsModal();});
 
 // ── LIST ──────────────────────────────────────────────────────────────────────
@@ -624,6 +639,60 @@ function crewSectionHTML(){
 }
 
 // ── FORM ──────────────────────────────────────────────────────────────────────
+// ── CRM ──────────────────────────────────────────────────────────────────────
+function loadCRM(){try{return JSON.parse(localStorage.getItem('lsc-crm')||'[]');}catch(e){return[];}}
+function saveCRM(d){try{localStorage.setItem('lsc-crm',JSON.stringify(d));}catch(e){}}
+
+function renderCRM(el){
+  var clients=loadCRM();
+  var html='<div class="page-head"><div><div class="page-title">Client CRM</div>'+
+    '<div class="page-sub">'+(clients.length?clients.length+' client'+(clients.length!==1?'s':''):' No clients saved yet')+'</div></div></div>'+
+    '<div class="crm-add-form">'+
+      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:700;margin-bottom:16px">Add New Client</div>'+
+      '<div class="crm-add-form form-row">'+
+        '<div class="field"><label>Business Name</label><input id="crm-f-biz" type="text" placeholder="e.g. Acme Corp"></div>'+
+        '<div class="field"><label>Client Name</label><input id="crm-f-name" type="text" placeholder="e.g. Jane Smith"></div>'+
+        '<div class="field"><label>Client Email</label><input id="crm-f-email" type="email" placeholder="e.g. jane@acme.com"></div>'+
+        '<div class="field"><button class="btn btn-accent" id="crm-add-btn">+ Add Client</button></div>'+
+      '</div>'+
+    '</div>'+
+    (clients.length?
+      '<table class="crm-table">'+
+        '<thead><tr><th>Business</th><th>Client</th><th>Email</th><th></th></tr></thead>'+
+        '<tbody>'+
+        clients.map(function(cl,i){
+          return'<tr>'+
+            '<td>'+esc(cl.businessName||'—')+'</td>'+
+            '<td>'+esc(cl.clientName||'—')+'</td>'+
+            '<td>'+esc(cl.clientEmail||'—')+'</td>'+
+            '<td style="text-align:right"><button class="btn btn-danger btn-sm crm-del" data-i="'+i+'">Delete</button></td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table>':
+      '<div class="empty-state"><h3>No clients yet</h3><p>Add your first client using the form above.</p></div>');
+  el.innerHTML=html;
+  $id('crm-add-btn').addEventListener('click',function(){
+    var b=($id('crm-f-biz').value||'').trim();
+    var n=($id('crm-f-name').value||'').trim();
+    var e=($id('crm-f-email').value||'').trim();
+    if(!b&&!n){showToast('Enter at least a Business or Client name','err');return;}
+    var list=loadCRM();
+    list.push({id:Date.now(),businessName:b,clientName:n,clientEmail:e});
+    saveCRM(list);
+    showToast('✓ Client saved to CRM','ok',false);
+    renderCRM(el);
+  });
+  qsa('.crm-del',el).forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var list=loadCRM();
+      list.splice(parseInt(btn.dataset.i),1);
+      saveCRM(list);
+      showToast('Client removed','ok',false);
+      renderCRM(el);
+    });
+  });
+}
+
 function renderForm(el){
   rowCounter=0;
   var p=editProj;
@@ -635,6 +704,20 @@ function renderForm(el){
     '<input id="f-upid" type="text" class="upid-field" value="'+esc(p?p.upid:'')+'"></div>'+
     '<div class="field"><label>Project Name *</label><input id="f-name" type="text" value="'+esc(p?p.name:'')+'"></div>'+
     '<div class="field"><label>Date</label><input id="f-date" type="date" value="'+(p?p.date:today())+'"></div>'+
+    (function(){
+      var _cl=loadCRM();
+      if(!_cl.length)return'';
+      return'<div class="field full crm-select-wrap">'+
+        '<label>Select Client from CRM</label>'+
+        '<select class="crm-autofill" id="f-crm-pick">'+
+          '<option value="">— choose a saved client —</option>'+
+          _cl.map(function(cl,i){
+            var label=cl.businessName||(cl.clientName);
+            if(cl.businessName&&cl.clientName)label+=(' — '+cl.clientName);
+            return'<option value="'+i+'">'+esc(label)+'</option>';
+          }).join('')+
+        '</select></div>';
+    })()+
     '<div class="field"><label>Business Name</label><input id="f-business" type="text" value="'+esc(p?p.businessName||'':'')+'"></div>'+
     '<div class="field"><label>Client Name</label><input id="f-clientname" type="text" value="'+esc(p?p.clientName||'':'')+'"></div>'+
     '<div class="field full"><label>Client Email</label><input id="f-clientemail" type="email" value="'+esc(p?p.clientEmail||'':'')+'"></div>'+
@@ -710,6 +793,18 @@ function bindFormGlobal(el){
   var del=$id('js-del');if(del)del.addEventListener('click',deleteProject);
   var dtSel=$id('f-doctype');var invWrap=$id('inv-num-wrap');
   if(dtSel){dtSel.addEventListener('change',function(){if(invWrap)invWrap.classList.toggle('show',this.value==='invoice');});}
+  var crmPick=$id('f-crm-pick');
+  if(crmPick){
+    crmPick.addEventListener('change',function(){
+      var i=parseInt(this.value);
+      if(isNaN(i))return;
+      var cl=loadCRM()[i];
+      if(!cl)return;
+      if($id('f-business'))$id('f-business').value=cl.businessName||'';
+      if($id('f-clientname'))$id('f-clientname').value=cl.clientName||'';
+      if($id('f-clientemail'))$id('f-clientemail').value=cl.clientEmail||'';
+    });
+  }
 
   labourSections.forEach(function(sec){
     var btn=$id('add-'+sec.id);
