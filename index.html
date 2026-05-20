@@ -190,7 +190,12 @@ button,input,textarea,select{font-family:'Funnel Sans','FunnelSans',sans-serif}
 .inv-num-inp{background:var(--surface);border:1px solid var(--accent);color:var(--text);font-size:12px;padding:6px 10px;outline:none;width:130px;font-family:'Funnel Sans',sans-serif}
 .inv-num-inp:focus{border-color:var(--text)}
 .crm-add-form{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:28px}
-.crm-add-form .form-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:flex-end}
+.crm-add-form .form-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:flex-end}
+.crm-edit-inp{background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;padding:2px 4px;width:100%;outline:none;font-family:'Funnel Sans',sans-serif;transition:border-color .15s}
+.crm-edit-inp:focus{border-bottom-color:var(--accent);background:rgba(240,237,232,0.04)}
+.crm-edit-inp.dirty{border-bottom-color:var(--accent)}
+.crm-save-btn{display:none;font-size:9px;padding:2px 8px}
+.crm-save-btn.show{display:inline-block}
 .crm-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border)}
 .crm-table th{text-align:left;padding:9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600}
 .crm-table td{padding:11px 14px;font-size:12px;color:var(--text);border-bottom:1px solid var(--border)}
@@ -653,35 +658,67 @@ function renderCRM(el){
         '<div class="field"><label>Business Name</label><input id="crm-f-biz" type="text" placeholder="e.g. Acme Corp"></div>'+
         '<div class="field"><label>Client Name</label><input id="crm-f-name" type="text" placeholder="e.g. Jane Smith"></div>'+
         '<div class="field"><label>Client Email</label><input id="crm-f-email" type="email" placeholder="e.g. jane@acme.com"></div>'+
+        '<div class="field"><label>Phone</label><input id="crm-f-phone" type="tel" placeholder="e.g. 04 12 345 678"></div>'+
         '<div class="field"><button class="btn btn-accent" id="crm-add-btn">+ Add Client</button></div>'+
       '</div>'+
     '</div>'+
     (clients.length?
       '<table class="crm-table">'+
-        '<thead><tr><th>Business</th><th>Client</th><th>Email</th><th></th></tr></thead>'+
+        '<thead><tr><th>Business</th><th>Client</th><th>Email</th><th>Phone</th><th></th></tr></thead>'+
         '<tbody>'+
         clients.map(function(cl,i){
-          return'<tr>'+
-            '<td>'+esc(cl.businessName||'—')+'</td>'+
-            '<td>'+esc(cl.clientName||'—')+'</td>'+
-            '<td>'+esc(cl.clientEmail||'—')+'</td>'+
-            '<td style="text-align:right"><button class="btn btn-danger btn-sm crm-del" data-i="'+i+'">Delete</button></td>'+
+          return'<tr data-ci="'+i+'">'+
+            '<td><input class="crm-edit-inp" data-f="businessName" data-i="'+i+'" value="'+esc(cl.businessName||'')+'"></td>'+
+            '<td><input class="crm-edit-inp" data-f="clientName" data-i="'+i+'" value="'+esc(cl.clientName||'')+'"></td>'+
+            '<td><input class="crm-edit-inp" data-f="clientEmail" data-i="'+i+'" value="'+esc(cl.clientEmail||'')+'"></td>'+
+            '<td><input class="crm-edit-inp" data-f="clientPhone" data-i="'+i+'" value="'+esc(cl.clientPhone||'')+'"></td>'+
+            '<td style="text-align:right;white-space:nowrap">'+
+              '<button class="btn btn-sm btn-accent crm-save-btn" data-i="'+i+'">Save</button> '+
+              '<button class="btn btn-danger btn-sm crm-del" data-i="'+i+'">Delete</button>'+
+            '</td>'+
           '</tr>';
         }).join('')+
         '</tbody></table>':
       '<div class="empty-state"><h3>No clients yet</h3><p>Add your first client using the form above.</p></div>');
   el.innerHTML=html;
+
+  // add new client
   $id('crm-add-btn').addEventListener('click',function(){
     var b=($id('crm-f-biz').value||'').trim();
     var n=($id('crm-f-name').value||'').trim();
     var e=($id('crm-f-email').value||'').trim();
+    var ph=($id('crm-f-phone').value||'').trim();
     if(!b&&!n){showToast('Enter at least a Business or Client name','err');return;}
     var list=loadCRM();
-    list.push({id:Date.now(),businessName:b,clientName:n,clientEmail:e});
+    list.push({id:Date.now(),businessName:b,clientName:n,clientEmail:e,clientPhone:ph});
     saveCRM(list);
     showToast('✓ Client saved to CRM','ok',false);
     renderCRM(el);
   });
+
+  // mark row dirty on input change → show Save button
+  qsa('.crm-edit-inp',el).forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var saveBtn=el.querySelector('.crm-save-btn[data-i="'+inp.dataset.i+'"]');
+      if(saveBtn)saveBtn.classList.add('show');
+      inp.classList.add('dirty');
+    });
+  });
+
+  // save edited row
+  qsa('.crm-save-btn',el).forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var i=parseInt(btn.dataset.i);
+      var list=loadCRM();
+      var row=el.querySelectorAll('.crm-edit-inp[data-i="'+i+'"]');
+      row.forEach(function(inp){list[i][inp.dataset.f]=inp.value.trim();});
+      saveCRM(list);
+      showToast('✓ Client updated','ok',false);
+      renderCRM(el);
+    });
+  });
+
+  // delete row
   qsa('.crm-del',el).forEach(function(btn){
     btn.addEventListener('click',function(){
       var list=loadCRM();
@@ -720,7 +757,8 @@ function renderForm(el){
     })()+
     '<div class="field"><label>Business Name</label><input id="f-business" type="text" value="'+esc(p?p.businessName||'':'')+'"></div>'+
     '<div class="field"><label>Client Name</label><input id="f-clientname" type="text" value="'+esc(p?p.clientName||'':'')+'"></div>'+
-    '<div class="field full"><label>Client Email</label><input id="f-clientemail" type="email" value="'+esc(p?p.clientEmail||'':'')+'"></div>'+
+    '<div class="field"><label>Client Email</label><input id="f-clientemail" type="email" value="'+esc(p?p.clientEmail||'':'')+'"></div>'+
+    '<div class="field"><label>Phone</label><input id="f-clientphone" type="tel" value="'+esc(p?p.clientPhone||'':'')+'"></div>'+
     '<div class="field full"><label>Internal Notes</label><textarea id="f-notes">'+esc(p?p.notes||'':'')+'</textarea></div>'+
   '</div>'+
   '<div class="doc-type-bar">'+
@@ -803,6 +841,7 @@ function bindFormGlobal(el){
       if($id('f-business'))$id('f-business').value=cl.businessName||'';
       if($id('f-clientname'))$id('f-clientname').value=cl.clientName||'';
       if($id('f-clientemail'))$id('f-clientemail').value=cl.clientEmail||'';
+      if($id('f-clientphone'))$id('f-clientphone').value=cl.clientPhone||'';
     });
   }
 
@@ -889,6 +928,7 @@ function saveProject(){
     businessName:($id('f-business')&&$id('f-business').value||'').trim(),
     clientName:($id('f-clientname')&&$id('f-clientname').value||'').trim(),
     clientEmail:($id('f-clientemail')&&$id('f-clientemail').value||'').trim(),
+    clientPhone:($id('f-clientphone')&&$id('f-clientphone').value||'').trim(),
     date:$id('f-date')&&$id('f-date').value||'',
     notes:($id('f-notes')&&$id('f-notes').value||'').trim(),
     docType:($id('f-doctype')&&$id('f-doctype').value)||'estimate',
@@ -917,7 +957,7 @@ function renderEstimate(el){
       '<div style="color:var(--muted);font-size:11px;margin-bottom:4px">'+esc(proj.date||'')+'</div>'+
       '<div class="est-name">'+esc(proj.name)+'</div>'+
       (proj.businessName?'<div class="est-client">'+esc(proj.businessName)+'</div>':'')+
-      (proj.clientName?'<div class="est-client" style="margin-top:2px">'+esc(proj.clientName)+(proj.clientEmail?' &nbsp;&middot;&nbsp; <span style="color:var(--accent)">'+esc(proj.clientEmail)+'</span>':'')+'</div>':'')+
+      (proj.clientName?'<div class="est-client" style="margin-top:2px">'+esc(proj.clientName)+(proj.clientEmail?' &nbsp;&middot;&nbsp; <span style="color:var(--accent)">'+esc(proj.clientEmail)+'</span>':'')+(proj.clientPhone?' &nbsp;&middot;&nbsp; <span style="color:var(--muted)">'+esc(proj.clientPhone)+'</span>':'')+'</div>':'')+
     '</div>'+
     '<div style="display:flex;align-items:center;gap:8px">'+
       '<button class="btn btn-ghost btn-sm" id="js-edit">Edit</button>'+
@@ -1053,7 +1093,7 @@ function buildClientPDF(proj){
         '<div class="eyebrow">Prepared for</div>'+
         '<div style="font-size:20pt;font-weight:800;color:#252930;line-height:1.05;letter-spacing:-.01em">'+esc(proj.name)+'</div>'+
         (proj.businessName?'<div style="font-size:11pt;color:#3A4756;margin-top:5px;font-weight:500">'+esc(proj.businessName)+'</div>':'')+
-        (proj.clientName?'<div style="font-size:9pt;color:#7A7470;margin-top:4px">'+esc(proj.clientName)+(proj.clientEmail?' &middot; <a href="mailto:'+esc(proj.clientEmail)+'">'+esc(proj.clientEmail)+'</a>':'')+'</div>':'')+
+        (proj.clientName?'<div style="font-size:9pt;color:#7A7470;margin-top:4px">'+esc(proj.clientName)+(proj.clientEmail?' &middot; <a href="mailto:'+esc(proj.clientEmail)+'">'+esc(proj.clientEmail)+'</a>':'')+(proj.clientPhone?' &middot; '+esc(proj.clientPhone):'')+'</div>':'')+
       '</div>'+
       (function(){
         var drows=(proj.activeRows&&proj.activeRows.deliverables||[]).filter(function(d){return d.name;});
@@ -1134,7 +1174,7 @@ function buildClientInvoicePDF(proj){
         '<div class="eyebrow">Billed to</div>'+
         '<div style="font-size:20pt;font-weight:800;color:#252930;line-height:1.05;letter-spacing:-.01em">'+esc(proj.name)+'</div>'+
         (proj.businessName?'<div style="font-size:11pt;color:#3A4756;margin-top:5px;font-weight:500">'+esc(proj.businessName)+'</div>':'')+
-        (proj.clientName?'<div style="font-size:9pt;color:#7A7470;margin-top:4px">'+esc(proj.clientName)+(proj.clientEmail?' &middot; <a href="mailto:'+esc(proj.clientEmail)+'">'+esc(proj.clientEmail)+'</a>':'')+'</div>':'')+
+        (proj.clientName?'<div style="font-size:9pt;color:#7A7470;margin-top:4px">'+esc(proj.clientName)+(proj.clientEmail?' &middot; <a href="mailto:'+esc(proj.clientEmail)+'">'+esc(proj.clientEmail)+'</a>':'')+(proj.clientPhone?' &middot; '+esc(proj.clientPhone):'')+'</div>':'')+
       '</div>'+
       (function(){
         var drows=(proj.activeRows&&proj.activeRows.deliverables||[]).filter(function(d){return d.name;});
